@@ -1,13 +1,2682 @@
 
-
-generator client {
-  provider = "prisma-client"
-  output   = "./generated"
+generator py {
+  provider                    = "prisma-client-py"
+  enable_experimental_decimal = true
+  recursive_type_depth = 5
 }
-// This `datasource` file isn't used but Prisma ORM still requires the `datasource` definition.
-// Your SQLite database file will be managed by D1:
-// - A local version will exist in `.wrangler`.
-// - The remote version is managed by Cloudflare in the Cloud.
+
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model account_emailaddress {
+  id                        Int                         @id @default(autoincrement())
+  email                     String                      @db.VarChar(254)
+  verified                  Boolean
+  primary                   Boolean
+  user_id                   Int
+  auth_user                 auth_user                   @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "account_emailaddress_user_id_2c513194_fk_auth_user_id")
+  account_emailconfirmation account_emailconfirmation[]
+
+  @@unique([user_id, email], map: "account_emailaddress_user_id_email_987c8728_uniq")
+  @@index([email], map: "account_emailaddress_email_03be32b2")
+  @@index([email], map: "account_emailaddress_email_03be32b2_like")
+  @@index([user_id], map: "account_emailaddress_user_id_2c513194")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model account_emailconfirmation {
+  id                   Int                  @id @default(autoincrement())
+  created              DateTime             @db.Timestamptz(6)
+  sent                 DateTime?            @db.Timestamptz(6)
+  key                  String               @unique @db.VarChar(64)
+  email_address_id     Int
+  account_emailaddress account_emailaddress @relation(fields: [email_address_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "account_emailconfirm_email_address_id_5b7f8c58_fk_account_e")
+
+  @@index([email_address_id], map: "account_emailconfirmation_email_address_id_5b7f8c58")
+  @@index([key], map: "account_emailconfirmation_key_f43612bd_like")
+}
+
+model auth_group {
+  id                     Int                      @id @default(autoincrement())
+  name                   String                   @unique @db.VarChar(150)
+  auth_group_permissions auth_group_permissions[]
+  auth_user_groups       auth_user_groups[]
+
+  @@index([name], map: "auth_group_name_a6ea08ec_like")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model auth_group_permissions {
+  id              Int             @id @default(autoincrement())
+  group_id        Int
+  permission_id   Int
+  auth_permission auth_permission @relation(fields: [permission_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "auth_group_permissio_permission_id_84c5c92e_fk_auth_perm")
+  auth_group      auth_group      @relation(fields: [group_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "auth_group_permissions_group_id_b120cbf9_fk_auth_group_id")
+
+  @@unique([group_id, permission_id], map: "auth_group_permissions_group_id_permission_id_0cd325b0_uniq")
+  @@index([group_id], map: "auth_group_permissions_group_id_b120cbf9")
+  @@index([permission_id], map: "auth_group_permissions_permission_id_84c5c92e")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model auth_permission {
+  id                         Int                          @id @default(autoincrement())
+  name                       String                       @db.VarChar(255)
+  content_type_id            Int
+  codename                   String                       @db.VarChar(100)
+  auth_group_permissions     auth_group_permissions[]
+  django_content_type        django_content_type          @relation(fields: [content_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "auth_permission_content_type_id_2f476e4b_fk_django_co")
+  auth_user_user_permissions auth_user_user_permissions[]
+
+  @@unique([content_type_id, codename], map: "auth_permission_content_type_id_codename_01ab375a_uniq")
+  @@index([content_type_id], map: "auth_permission_content_type_id_2f476e4b")
+}
+
+model auth_user {
+  id                                                               Int                                    @id @default(autoincrement())
+  password                                                         String                                 @db.VarChar(128)
+  last_login                                                       DateTime?                              @db.Timestamptz(6)
+  is_superuser                                                     Boolean
+  username                                                         String                                 @unique @db.VarChar(150)
+  first_name                                                       String                                 @db.VarChar(150)
+  last_name                                                        String                                 @db.VarChar(150)
+  email                                                            String                                 @db.VarChar(254)
+  is_staff                                                         Boolean
+  is_active                                                        Boolean
+  date_joined                                                      DateTime                               @db.Timestamptz(6)
+  account_emailaddress                                             account_emailaddress[]
+  auth_user_groups                                                 auth_user_groups[]
+  auth_user_user_permissions                                       auth_user_user_permissions[]
+  authtoken_token                                                  authtoken_token?
+  blog_post                                                        blog_post[]
+  django_admin_log                                                 django_admin_log[]
+  sizzle_dailystatusreport                                         sizzle_dailystatusreport[]
+  sizzle_remindersettings                                          sizzle_remindersettings?
+  sizzle_timelog                                                   sizzle_timelog[]
+  socialaccount_socialaccount                                      socialaccount_socialaccount[]
+  star_ratings_userrating                                          star_ratings_userrating[]
+  website_activity                                                 website_activity[]
+  website_activity_dislikes                                        website_activity_dislikes[]
+  website_activity_likes                                           website_activity_likes[]
+  website_activitylog                                              website_activitylog[]
+  website_baconearning                                             website_baconearning[]
+  website_baconsubmission                                          website_baconsubmission[]
+  website_bacontoken                                               website_bacontoken[]
+  website_bid                                                      website_bid[]
+  website_challenge_participants                                   website_challenge_participants[]
+  website_contribution                                             website_contribution[]
+  website_dailystatusreport                                        website_dailystatusreport[]
+  website_domain_managers                                          website_domain_managers[]
+  website_forumcomment                                             website_forumcomment[]
+  website_forumpost                                                website_forumpost[]
+  website_forumvote                                                website_forumvote[]
+  website_githubissue                                              website_githubissue[]
+  website_invitefriend                                             website_invitefriend[]
+  website_invitefriend_recipients                                  website_invitefriend_recipients[]
+  website_inviteorganization                                       website_inviteorganization[]
+  website_ipreport                                                 website_ipreport[]
+  website_issue_website_issue_closed_by_idToauth_user              website_issue[]                        @relation("website_issue_closed_by_idToauth_user")
+  website_issue_website_issue_user_idToauth_user                   website_issue[]                        @relation("website_issue_user_idToauth_user")
+  website_issue_team_members                                       website_issue_team_members[]
+  website_job                                                      website_job[]
+  website_joinrequest                                              website_joinrequest[]
+  website_kudos_website_kudos_receiver_idToauth_user               website_kudos[]                        @relation("website_kudos_receiver_idToauth_user")
+  website_kudos_website_kudos_sender_idToauth_user                 website_kudos[]                        @relation("website_kudos_sender_idToauth_user")
+  website_message                                                  website_message[]
+  website_monitor                                                  website_monitor[]
+  website_newslettersubscriber                                     website_newslettersubscriber[]
+  website_notification                                             website_notification[]
+  website_organization                                             website_organization[]
+  website_organization_managers                                    website_organization_managers[]
+  website_organizationadmin                                        website_organizationadmin[]
+  website_points                                                   website_points[]
+  website_remindersettings                                         website_remindersettings?
+  website_room                                                     website_room[]
+  website_room_users                                               website_room_users[]
+  website_searchhistory                                            website_searchhistory[]
+  website_stakingentry                                             website_stakingentry[]
+  website_stakingpool_website_stakingpool_created_by_idToauth_user website_stakingpool[]                  @relation("website_stakingpool_created_by_idToauth_user")
+  website_stakingpool_website_stakingpool_winner_idToauth_user     website_stakingpool[]                  @relation("website_stakingpool_winner_idToauth_user")
+  website_stakingtransaction                                       website_stakingtransaction[]
+  website_thread_participants                                      website_thread_participants[]
+  website_timelog                                                  website_timelog[]
+  website_useradventureprogress                                    website_useradventureprogress[]
+  website_userbadge_website_userbadge_awarded_by_idToauth_user     website_userbadge[]                    @relation("website_userbadge_awarded_by_idToauth_user")
+  website_userbadge_website_userbadge_user_idToauth_user           website_userbadge[]                    @relation("website_userbadge_user_idToauth_user")
+  website_userlabprogress                                          website_userlabprogress[]
+  website_userprofile                                              website_userprofile?
+  website_userprofile_subscribed_users                             website_userprofile_subscribed_users[]
+  website_usertaskprogress                                         website_usertaskprogress[]
+  website_usertasksubmission                                       website_usertasksubmission[]
+  website_wallet                                                   website_wallet[]
+  website_winner_website_winner_runner_idToauth_user               website_winner[]                       @relation("website_winner_runner_idToauth_user")
+  website_winner_website_winner_second_runner_idToauth_user        website_winner[]                       @relation("website_winner_second_runner_idToauth_user")
+  website_winner_website_winner_winner_idToauth_user               website_winner[]                       @relation("website_winner_winner_idToauth_user")
+
+  @@index([username], map: "auth_user_username_6821ab7c_like")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model auth_user_groups {
+  id         Int        @id @default(autoincrement())
+  user_id    Int
+  group_id   Int
+  auth_group auth_group @relation(fields: [group_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "auth_user_groups_group_id_97559544_fk_auth_group_id")
+  auth_user  auth_user  @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "auth_user_groups_user_id_6a12ed8b_fk_auth_user_id")
+
+  @@unique([user_id, group_id], map: "auth_user_groups_user_id_group_id_94350c0c_uniq")
+  @@index([group_id], map: "auth_user_groups_group_id_97559544")
+  @@index([user_id], map: "auth_user_groups_user_id_6a12ed8b")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model auth_user_user_permissions {
+  id              Int             @id @default(autoincrement())
+  user_id         Int
+  permission_id   Int
+  auth_permission auth_permission @relation(fields: [permission_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "auth_user_user_permi_permission_id_1fbb5f2c_fk_auth_perm")
+  auth_user       auth_user       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "auth_user_user_permissions_user_id_a95ead1b_fk_auth_user_id")
+
+  @@unique([user_id, permission_id], map: "auth_user_user_permissions_user_id_permission_id_14a6b632_uniq")
+  @@index([permission_id], map: "auth_user_user_permissions_permission_id_1fbb5f2c")
+  @@index([user_id], map: "auth_user_user_permissions_user_id_a95ead1b")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model authtoken_token {
+  key       String    @id @db.VarChar(40)
+  created   DateTime  @db.Timestamptz(6)
+  user_id   Int       @unique
+  auth_user auth_user @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "authtoken_token_user_id_35299eff_fk_auth_user_id")
+
+  @@index([key], map: "authtoken_token_key_10f0b77e_like")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model blog_post {
+  id         Int       @id @default(autoincrement())
+  title      String    @db.VarChar(255)
+  slug       String    @unique @db.VarChar(255)
+  content    String
+  created_at DateTime  @db.Timestamptz(6)
+  updated_at DateTime  @db.Timestamptz(6)
+  image      String    @db.VarChar(100)
+  author_id  Int
+  auth_user  auth_user @relation(fields: [author_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "blog_post_author_id_dd7a8485_fk_auth_user_id")
+
+  @@index([author_id], map: "blog_post_author_id_dd7a8485")
+  @@index([slug], map: "blog_post_slug_b95473f2_like")
+}
+
+model captcha_captchastore {
+  id         Int      @id @default(autoincrement())
+  challenge  String   @db.VarChar(32)
+  response   String   @db.VarChar(32)
+  hashkey    String   @unique @db.VarChar(40)
+  expiration DateTime @db.Timestamptz(6)
+
+  @@index([hashkey], map: "captcha_captchastore_hashkey_cbe8d15a_like")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model comments_comment {
+  id                     Int                  @id @default(autoincrement())
+  author                 String               @db.VarChar(200)
+  author_url             String               @db.VarChar(200)
+  text                   String
+  created_date           DateTime             @db.Timestamptz(6)
+  parent_id              Int?
+  author_fk_id           Int?
+  content_type_id        Int
+  object_id              Int
+  website_userprofile    website_userprofile? @relation(fields: [author_fk_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "comments_comment_author_fk_id_933501b6_fk_website_u")
+  django_content_type    django_content_type  @relation(fields: [content_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "comments_comment_content_type_id_72fd5dbe_fk_django_co")
+  comments_comment       comments_comment?    @relation("comments_commentTocomments_comment", fields: [parent_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "comments_comment_parent_id_3e0802fb_fk_comments_comment_id")
+  other_comments_comment comments_comment[]   @relation("comments_commentTocomments_comment")
+
+  @@index([author_fk_id], map: "comments_comment_author_fk_id_933501b6")
+  @@index([content_type_id], map: "comments_comment_content_type_id_72fd5dbe")
+  @@index([parent_id], map: "comments_comment_parentId_id_67a39dee")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model django_admin_log {
+  id                  Int                  @id @default(autoincrement())
+  action_time         DateTime             @db.Timestamptz(6)
+  object_id           String?
+  object_repr         String               @db.VarChar(200)
+  action_flag         Int                  @db.SmallInt
+  change_message      String
+  content_type_id     Int?
+  user_id             Int
+  django_content_type django_content_type? @relation(fields: [content_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "django_admin_log_content_type_id_c4bce8eb_fk_django_co")
+  auth_user           auth_user            @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "django_admin_log_user_id_c564eba6_fk_auth_user_id")
+
+  @@index([content_type_id], map: "django_admin_log_content_type_id_c4bce8eb")
+  @@index([user_id], map: "django_admin_log_user_id_c564eba6")
+}
+
+model django_content_type {
+  id                  Int                   @id @default(autoincrement())
+  app_label           String                @db.VarChar(100)
+  model               String                @db.VarChar(100)
+  auth_permission     auth_permission[]
+  comments_comment    comments_comment[]
+  django_admin_log    django_admin_log[]
+  star_ratings_rating star_ratings_rating[]
+  website_activity    website_activity[]
+
+  @@unique([app_label, model], map: "django_content_type_app_label_model_76bd3d3b_uniq")
+}
+
+model django_migrations {
+  id      Int      @id @default(autoincrement())
+  app     String   @db.VarChar(255)
+  name    String   @db.VarChar(255)
+  applied DateTime @db.Timestamptz(6)
+}
+
+model django_session {
+  session_key  String   @id @db.VarChar(40)
+  session_data String
+  expire_date  DateTime @db.Timestamptz(6)
+
+  @@index([expire_date], map: "django_session_expire_date_a5c62663")
+  @@index([session_key], map: "django_session_session_key_c0390e0f_like")
+}
+
+model django_site {
+  id                            Int                             @id @default(autoincrement())
+  domain                        String                          @unique(map: "django_site_domain_a2e37b91_uniq") @db.VarChar(100)
+  name                          String                          @db.VarChar(50)
+  socialaccount_socialapp_sites socialaccount_socialapp_sites[]
+
+  @@index([domain], map: "django_site_domain_a2e37b91_like")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model sizzle_dailystatusreport {
+  id                BigInt    @id @default(autoincrement())
+  date              DateTime  @db.Date
+  previous_work     String
+  next_plan         String
+  blockers          String
+  goal_accomplished Boolean
+  current_mood      String    @db.VarChar(50)
+  created           DateTime  @db.Timestamptz(6)
+  user_id           Int
+  auth_user         auth_user @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "sizzle_dailystatusreport_user_id_844cddce_fk_auth_user_id")
+
+  @@unique([user_id, date], map: "sizzle_dailystatusreport_user_id_date_484e9161_uniq")
+  @@index([user_id, date], map: "sizzle_dail_user_id_667d52_idx")
+  @@index([user_id], map: "sizzle_dailystatusreport_user_id_844cddce")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model sizzle_remindersettings {
+  id                 BigInt    @id @default(autoincrement())
+  reminder_time      DateTime  @db.Time(6)
+  reminder_time_utc  DateTime? @db.Time(6)
+  timezone           String    @db.VarChar(50)
+  is_active          Boolean
+  last_reminder_sent DateTime? @db.Timestamptz(6)
+  created_at         DateTime  @db.Timestamptz(6)
+  updated_at         DateTime  @db.Timestamptz(6)
+  user_id            Int       @unique
+  auth_user          auth_user @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "sizzle_remindersettings_user_id_45940880_fk_auth_user_id")
+
+  @@index([is_active], map: "sizzle_remi_is_acti_dde965_idx")
+  @@index([reminder_time_utc], map: "sizzle_remi_reminde_8c6dc9_idx")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model sizzle_timelog {
+  id                   BigInt                   @id @default(autoincrement())
+  start_time           DateTime                 @db.Timestamptz(6)
+  end_time             DateTime?                @db.Timestamptz(6)
+  duration             Unsupported("interval")?
+  github_issue_url     String?                  @db.VarChar(200)
+  created              DateTime                 @db.Timestamptz(6)
+  organization_id      Int?
+  user_id              Int
+  website_organization website_organization?    @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "sizzle_timelog_organization_id_86c3bb88_fk_website_o")
+  auth_user            auth_user                @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "sizzle_timelog_user_id_87363df7_fk_auth_user_id")
+
+  @@index([organization_id], map: "sizzle_timelog_organization_id_86c3bb88")
+  @@index([user_id], map: "sizzle_timelog_user_id_87363df7")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model socialaccount_socialaccount {
+  id                        Int                         @id @default(autoincrement())
+  provider                  String                      @db.VarChar(200)
+  uid                       String                      @db.VarChar(191)
+  last_login                DateTime                    @db.Timestamptz(6)
+  date_joined               DateTime                    @db.Timestamptz(6)
+  extra_data                Json
+  user_id                   Int
+  auth_user                 auth_user                   @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "socialaccount_socialaccount_user_id_8146e70c_fk_auth_user_id")
+  socialaccount_socialtoken socialaccount_socialtoken[]
+
+  @@unique([provider, uid], map: "socialaccount_socialaccount_provider_uid_fc810c6e_uniq")
+  @@index([user_id], map: "socialaccount_socialaccount_user_id_8146e70c")
+}
+
+model socialaccount_socialapp {
+  id                            Int                             @id @default(autoincrement())
+  provider                      String                          @db.VarChar(30)
+  name                          String                          @db.VarChar(40)
+  client_id                     String                          @db.VarChar(191)
+  secret                        String                          @db.VarChar(191)
+  key                           String                          @db.VarChar(191)
+  provider_id                   String                          @db.VarChar(200)
+  settings                      Json
+  socialaccount_socialapp_sites socialaccount_socialapp_sites[]
+  socialaccount_socialtoken     socialaccount_socialtoken[]
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model socialaccount_socialapp_sites {
+  id                      Int                     @id @default(autoincrement())
+  socialapp_id            Int
+  site_id                 Int
+  django_site             django_site             @relation(fields: [site_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "socialaccount_social_site_id_2579dee5_fk_django_si")
+  socialaccount_socialapp socialaccount_socialapp @relation(fields: [socialapp_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "socialaccount_social_socialapp_id_97fb6e7d_fk_socialacc")
+
+  @@unique([socialapp_id, site_id], map: "socialaccount_socialapp__socialapp_id_site_id_71a9a768_uniq")
+  @@index([site_id], map: "socialaccount_socialapp_sites_site_id_2579dee5")
+  @@index([socialapp_id], map: "socialaccount_socialapp_sites_socialapp_id_97fb6e7d")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model socialaccount_socialtoken {
+  id                          Int                         @id @default(autoincrement())
+  token                       String
+  token_secret                String
+  expires_at                  DateTime?                   @db.Timestamptz(6)
+  account_id                  Int
+  app_id                      Int?
+  socialaccount_socialaccount socialaccount_socialaccount @relation(fields: [account_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "socialaccount_social_account_id_951f210e_fk_socialacc")
+  socialaccount_socialapp     socialaccount_socialapp?    @relation(fields: [app_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "socialaccount_social_app_id_636a42d7_fk_socialacc")
+
+  @@unique([app_id, account_id], map: "socialaccount_socialtoken_app_id_account_id_fca4e0ac_uniq")
+  @@index([account_id], map: "socialaccount_socialtoken_account_id_951f210e")
+  @@index([app_id], map: "socialaccount_socialtoken_app_id_636a42d7")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model star_ratings_rating {
+  id                      Int                       @id @default(autoincrement())
+  count                   Int
+  total                   Int
+  average                 Decimal                   @db.Decimal(6, 3)
+  object_id               Int?
+  content_type_id         Int?
+  django_content_type     django_content_type?      @relation(fields: [content_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "star_ratings_rating_content_type_id_176abacc_fk_django_co")
+  star_ratings_userrating star_ratings_userrating[]
+
+  @@unique([content_type_id, object_id], map: "star_ratings_rating_content_type_id_object_id_f170c88b_uniq")
+  @@index([content_type_id], map: "star_ratings_rating_content_type_id_176abacc")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model star_ratings_userrating {
+  id                  Int                 @id @default(autoincrement())
+  created             DateTime            @db.Timestamptz(6)
+  modified            DateTime            @db.Timestamptz(6)
+  ip                  String?             @db.Inet
+  score               Int                 @db.SmallInt
+  rating_id           Int
+  user_id             Int?
+  star_ratings_rating star_ratings_rating @relation(fields: [rating_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "star_ratings_userrat_rating_id_e7ac9370_fk_star_rati")
+  auth_user           auth_user?          @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "star_ratings_userrating_user_id_33d5d349_fk_auth_user_id")
+
+  @@unique([user_id, rating_id], map: "star_ratings_userrating_user_id_rating_id_25ba0a69_uniq")
+  @@index([rating_id], map: "star_ratings_userrating_rating_id_e7ac9370")
+  @@index([user_id], map: "star_ratings_userrating_user_id_33d5d349")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_activity {
+  id                        Int                         @id @default(autoincrement())
+  action_type               String                      @db.VarChar(10)
+  title                     String                      @db.VarChar(255)
+  description               String?
+  image                     String?                     @db.VarChar(100)
+  timestamp                 DateTime                    @db.Timestamptz(6)
+  url                       String?                     @db.VarChar(200)
+  object_id                 Int
+  content_type_id           Int
+  user_id                   Int
+  dislike_count             Int
+  is_approved               Boolean
+  is_posted_to_bluesky      Boolean
+  like_count                Int
+  django_content_type       django_content_type         @relation(fields: [content_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_activity_content_type_id_f51ce432_fk_django_co")
+  auth_user                 auth_user                   @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_activity_user_id_0f1df33f_fk_auth_user_id")
+  website_activity_dislikes website_activity_dislikes[]
+  website_activity_likes    website_activity_likes[]
+
+  @@index([content_type_id], map: "website_activity_content_type_id_f51ce432")
+  @@index([user_id], map: "website_activity_user_id_0f1df33f")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_activity_dislikes {
+  id               Int              @id @default(autoincrement())
+  activity_id      Int
+  user_id          Int
+  website_activity website_activity @relation(fields: [activity_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_activity_dis_activity_id_a98c4314_fk_website_a")
+  auth_user        auth_user        @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_activity_dislikes_user_id_abed9e13_fk_auth_user_id")
+
+  @@unique([activity_id, user_id], map: "website_activity_dislikes_activity_id_user_id_7b1bed70_uniq")
+  @@index([activity_id], map: "website_activity_dislikes_activity_id_a98c4314")
+  @@index([user_id], map: "website_activity_dislikes_user_id_abed9e13")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_activity_likes {
+  id               Int              @id @default(autoincrement())
+  activity_id      Int
+  user_id          Int
+  website_activity website_activity @relation(fields: [activity_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_activity_lik_activity_id_09c7955f_fk_website_a")
+  auth_user        auth_user        @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_activity_likes_user_id_cd1f9b9b_fk_auth_user_id")
+
+  @@unique([activity_id, user_id], map: "website_activity_likes_activity_id_user_id_c0f3c66a_uniq")
+  @@index([activity_id], map: "website_activity_likes_activity_id_09c7955f")
+  @@index([user_id], map: "website_activity_likes_user_id_cd1f9b9b")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_activitylog {
+  id           Int       @id @default(autoincrement())
+  window_title String    @db.VarChar(255)
+  url          String?   @db.VarChar(200)
+  recorded_at  DateTime  @db.Timestamptz(6)
+  created      DateTime  @db.Timestamptz(6)
+  user_id      Int
+  auth_user    auth_user @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_activitylog_user_id_4f6ccee7_fk_auth_user_id")
+
+  @@index([user_id], map: "website_activitylog_user_id_4f6ccee7")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_adventure {
+  id                            Int                             @id @default(autoincrement())
+  title                         String                          @db.VarChar(200)
+  slug                          String                          @unique @db.VarChar(250)
+  description                   String
+  category                      String                          @db.VarChar(20)
+  difficulty                    String                          @db.VarChar(20)
+  badge_emoji                   String                          @db.VarChar(10)
+  badge_title                   String                          @db.VarChar(100)
+  estimated_time                String                          @db.VarChar(50)
+  is_active                     Boolean
+  created_at                    DateTime                        @db.Timestamptz(6)
+  updated_at                    DateTime                        @db.Timestamptz(6)
+  badge_id                      Int?
+  website_badge                 website_badge?                  @relation(fields: [badge_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_adventure_badge_id_4cbf93f2_fk_website_badge_id")
+  website_adventuretask         website_adventuretask[]
+  website_useradventureprogress website_useradventureprogress[]
+
+  @@index([badge_id], map: "website_adventure_badge_id_4cbf93f2")
+  @@index([slug], map: "website_adventure_slug_41f8fa26_like")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_adventuretask {
+  id                         Int                          @id @default(autoincrement())
+  title                      String                       @db.VarChar(300)
+  description                String
+  order                      Int
+  is_required                Boolean
+  created_at                 DateTime                     @db.Timestamptz(6)
+  adventure_id               Int
+  website_adventure          website_adventure            @relation(fields: [adventure_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_adventuretas_adventure_id_9ecfc224_fk_website_a")
+  website_usertasksubmission website_usertasksubmission[]
+
+  @@unique([adventure_id, order], map: "website_adventuretask_adventure_id_order_84e3c4dd_uniq")
+  @@index([adventure_id], map: "website_adventuretask_adventure_id_9ecfc224")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_baconearning {
+  id            Int       @id @default(autoincrement())
+  tokens_earned Decimal   @db.Decimal(10, 2)
+  timestamp     DateTime  @db.Timestamptz(6)
+  user_id       Int
+  auth_user     auth_user @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_baconearning_user_id_646d21e1_fk_auth_user_id")
+
+  @@index([user_id], map: "website_baconearning_user_id_646d21e1")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_baconsubmission {
+  id                 Int       @id @default(autoincrement())
+  github_url         String    @db.VarChar(200)
+  contribution_type  String    @db.VarChar(20)
+  description        String
+  created_at         DateTime  @db.Timestamptz(6)
+  status             String    @db.VarChar(20)
+  transaction_status String    @db.VarChar(20)
+  transaction_id     String?   @db.VarChar(255)
+  bacon_amount       Int
+  modified_at        DateTime  @db.Timestamptz(6)
+  user_id            Int
+  auth_user          auth_user @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_baconsubmission_user_id_942ff5ae_fk_auth_user_id")
+
+  @@index([user_id], map: "website_baconsubmission_user_id_942ff5ae")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_bacontoken {
+  id                   Int                  @id @default(autoincrement())
+  amount               Decimal              @db.Decimal(10, 2)
+  created              DateTime             @db.Timestamptz(6)
+  token_id             String?              @db.VarChar(64)
+  user_id              Int
+  contribution_id      Int                  @unique
+  website_contribution website_contribution @relation(fields: [contribution_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_bacontoken_contribution_id_8411a090_fk_website_c")
+  auth_user            auth_user            @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_bacontoken_user_id_4627f4a1_fk_auth_user_id")
+
+  @@index([user_id], map: "website_bacontoken_user_id_4627f4a1")
+}
+
+model website_badge {
+  id                Int                 @id @default(autoincrement())
+  title             String              @db.VarChar(100)
+  description       String
+  icon              String?             @db.VarChar(100)
+  type              String              @db.VarChar(10)
+  criteria          Json?
+  created_at        DateTime            @db.Timestamptz(6)
+  website_adventure website_adventure[]
+  website_userbadge website_userbadge[]
+}
+
+model website_bannedapp {
+  id           Int      @id @default(autoincrement())
+  country_name String   @db.VarChar(100)
+  country_code String   @db.VarChar(2)
+  app_name     String   @db.VarChar(100)
+  app_type     String   @db.VarChar(20)
+  ban_reason   String
+  ban_date     DateTime @db.Date
+  source_url   String   @db.VarChar(200)
+  is_active    Boolean
+  created_at   DateTime @db.Timestamptz(6)
+  updated_at   DateTime @db.Timestamptz(6)
+
+  @@index([country_code], map: "website_ban_country_119ba5_idx")
+  @@index([country_name], map: "website_ban_country_980b5d_idx")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_bid {
+  id              Int        @id @default(autoincrement())
+  issue_url       String     @db.VarChar(200)
+  user_id         Int?
+  created         DateTime   @db.Timestamptz(6)
+  modified        DateTime   @db.Timestamptz(6)
+  status          String     @db.VarChar(10)
+  pr_link         String?    @db.VarChar(200)
+  bch_address     String?    @db.VarChar(100)
+  amount_bch      Decimal    @db.Decimal(16, 8)
+  github_username String?    @db.VarChar(100)
+  auth_user       auth_user? @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_bid_user_id_23db6819_fk_auth_user_id")
+
+  @@index([user_id], map: "website_bid_user_id_23db6819")
+}
+
+model website_blocked {
+  id                Int      @id @default(autoincrement())
+  address           String?  @db.Inet
+  reason_for_block  String?
+  ip_network        String?  @db.Inet
+  user_agent_string String?  @db.VarChar(255)
+  count             Int
+  created           DateTime @db.Date
+  modified          DateTime @db.Timestamptz(6)
+}
+
+model website_challenge {
+  id                                  Int                                   @id @default(autoincrement())
+  title                               String                                @db.VarChar(255)
+  description                         String
+  challenge_type                      String                                @db.VarChar(10)
+  created_at                          DateTime                              @db.Timestamptz(6)
+  updated_at                          DateTime                              @db.Timestamptz(6)
+  points                              Int
+  progress                            Int
+  completed                           Boolean
+  completed_at                        DateTime?                             @db.Timestamptz(6)
+  bacon_reward                        Int
+  website_challenge_participants      website_challenge_participants[]
+  website_challenge_team_participants website_challenge_team_participants[]
+  website_stakingpool                 website_stakingpool[]
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_challenge_participants {
+  id                Int               @id @default(autoincrement())
+  challenge_id      Int
+  user_id           Int
+  website_challenge website_challenge @relation(fields: [challenge_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_challenge_pa_challenge_id_0708ce84_fk_website_c")
+  auth_user         auth_user         @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_challenge_participants_user_id_0aaf48dd_fk_auth_user_id")
+
+  @@unique([challenge_id, user_id], map: "website_challenge_partic_challenge_id_user_id_99c83aea_uniq")
+  @@index([challenge_id], map: "website_challenge_participants_challenge_id_0708ce84")
+  @@index([user_id], map: "website_challenge_participants_user_id_0aaf48dd")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_challenge_team_participants {
+  id                   Int                  @id @default(autoincrement())
+  challenge_id         Int
+  organization_id      Int
+  website_challenge    website_challenge    @relation(fields: [challenge_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_challenge_te_challenge_id_e2891449_fk_website_c")
+  website_organization website_organization @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_challenge_te_organization_id_9d7f6c85_fk_website_o")
+
+  @@unique([challenge_id, organization_id], map: "website_challenge_team_p_challenge_id_organizatio_4309d9ba_uniq")
+  @@index([challenge_id], map: "website_challenge_team_participants_challenge_id_e2891449")
+  @@index([organization_id], map: "website_challenge_team_participants_organization_id_9d7f6c85")
+}
+
+model website_chatbotlog {
+  id       Int      @id @default(autoincrement())
+  question String
+  answer   String
+  created  DateTime @db.Timestamptz(6)
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_contribution {
+  id                 Int                 @id @default(autoincrement())
+  title              String              @db.VarChar(255)
+  description        String
+  created            DateTime            @db.Timestamptz(6)
+  status             String              @db.VarChar(50)
+  txid               String?             @db.VarChar(64)
+  user_id            Int?
+  contribution_type  String              @db.VarChar(20)
+  github_id          String?             @db.VarChar(100)
+  github_url         String?             @db.VarChar(200)
+  repository_id      Int?
+  github_username    String              @db.VarChar(255)
+  website_bacontoken website_bacontoken?
+  website_project    website_project?    @relation(fields: [repository_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_contribution_repository_id_d18f3237_fk_website_p")
+  auth_user          auth_user?          @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_contribution_user_id_11433f26_fk_auth_user_id")
+
+  @@index([github_id], map: "website_con_github__0ac410_idx")
+  @@index([repository_id, created], map: "website_con_reposit_9a7e49_idx")
+  @@index([user_id, created], map: "website_con_user_id_0a46de_idx")
+  @@index([repository_id], map: "website_contribution_repository_id_d18f3237")
+  @@index([user_id], map: "website_contribution_user_id_11433f26")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model website_contributor {
+  id                                                                          Int                        @id @default(autoincrement())
+  name                                                                        String                     @db.VarChar(255)
+  github_id                                                                   Int                        @unique
+  github_url                                                                  String                     @db.VarChar(200)
+  avatar_url                                                                  String                     @db.VarChar(200)
+  contributor_type                                                            String                     @db.VarChar(255)
+  contributions                                                               Int
+  created                                                                     DateTime                   @db.Timestamptz(6)
+  website_contributorstats                                                    website_contributorstats[]
+  website_githubcomment                                                       website_githubcomment[]
+  website_githubissue_website_githubissue_assignee_idTowebsite_contributor    website_githubissue[]      @relation("website_githubissue_assignee_idTowebsite_contributor")
+  website_githubissue_website_githubissue_contributor_idTowebsite_contributor website_githubissue[]      @relation("website_githubissue_contributor_idTowebsite_contributor")
+  website_githubreview                                                        website_githubreview[]
+  website_repo_contributor                                                    website_repo_contributor[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_contributorstats {
+  id                  Int                 @id @default(autoincrement())
+  date                DateTime            @db.Date
+  commits             Int
+  issues_opened       Int
+  issues_closed       Int
+  pull_requests       Int
+  comments            Int
+  granularity         String              @db.VarChar(10)
+  contributor_id      Int
+  repo_id             Int
+  website_contributor website_contributor @relation(fields: [contributor_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_contributors_contributor_id_dcde1dfa_fk_website_c")
+  website_repo        website_repo        @relation(fields: [repo_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_contributorstats_repo_id_94acda5a_fk_website_repo_id")
+
+  @@unique([contributor_id, repo_id, date, granularity], map: "website_contributorstats_contributor_id_repo_id_d_e47bc88f_uniq")
+  @@index([contributor_id], map: "website_contributorstats_contributor_id_dcde1dfa")
+  @@index([repo_id], map: "website_contributorstats_repo_id_94acda5a")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_course {
+  id                  Int                   @id @default(autoincrement())
+  title               String                @db.VarChar(200)
+  description         String
+  thumbnail           String?               @db.VarChar(100)
+  level               String                @db.VarChar(3)
+  created_at          DateTime              @db.Timestamptz(6)
+  updated_at          DateTime              @db.Timestamptz(6)
+  instructor_id       Int
+  website_userprofile website_userprofile   @relation(fields: [instructor_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_course_instructor_id_365eac2a_fk_website_userprofile_id")
+  website_course_tags website_course_tags[]
+  website_enrollment  website_enrollment[]
+  website_rating      website_rating[]
+  website_section     website_section[]
+
+  @@index([instructor_id], map: "website_course_instructor_id_365eac2a")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_course_tags {
+  id             Int            @id @default(autoincrement())
+  course_id      Int
+  tag_id         Int
+  website_course website_course @relation(fields: [course_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_course_tags_course_id_1934acc3_fk_website_course_id")
+  website_tag    website_tag    @relation(fields: [tag_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_course_tags_tag_id_e34ff956_fk_website_tag_id")
+
+  @@unique([course_id, tag_id], map: "website_course_tags_course_id_tag_id_0580f3c7_uniq")
+  @@index([course_id], map: "website_course_tags_course_id_1934acc3")
+  @@index([tag_id], map: "website_course_tags_tag_id_e34ff956")
+}
+
+model website_dailystats {
+  id       Int      @id @default(autoincrement())
+  name     String   @db.VarChar(100)
+  value    String   @db.VarChar(255)
+  created  DateTime @db.Timestamptz(6)
+  modified DateTime @db.Timestamptz(6)
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_dailystatusreport {
+  id                Int       @id @default(autoincrement())
+  date              DateTime  @db.Date
+  previous_work     String
+  next_plan         String
+  blockers          String
+  created           DateTime  @db.Timestamptz(6)
+  user_id           Int
+  current_mood      String    @db.VarChar(50)
+  goal_accomplished Boolean
+  auth_user         auth_user @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_dailystatusreport_user_id_d37b2943_fk_auth_user_id")
+
+  @@index([user_id], map: "website_dailystatusreport_user_id_d37b2943")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_domain {
+  id                                     Int                                      @id @default(autoincrement())
+  name                                   String                                   @unique(map: "website_domain_name_7e5203d6_uniq") @db.VarChar(255)
+  url                                    String                                   @db.VarChar(200)
+  logo                                   String?                                  @db.VarChar(100)
+  clicks                                 Int?
+  color                                  String?                                  @db.VarChar(10)
+  email                                  String?                                  @db.VarChar(254)
+  twitter                                String?                                  @db.VarChar(30)
+  facebook                               String?                                  @db.VarChar(200)
+  created                                DateTime                                 @db.Timestamptz(6)
+  modified                               DateTime                                 @db.Timestamptz(6)
+  webshot                                String?                                  @db.VarChar(100)
+  github                                 String?                                  @db.VarChar(255)
+  email_event                            String?                                  @db.VarChar(255)
+  organization_id                        Int?
+  is_active                              Boolean
+  has_security_txt                       Boolean
+  security_txt_checked_at                DateTime?                                @db.Timestamptz(6)
+  website_organization                   website_organization?                    @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_domain_organization_id_eda1fc4e_fk_website_o")
+  website_domain_managers                website_domain_managers[]
+  website_domain_tags                    website_domain_tags[]
+  website_hunt                           website_hunt[]
+  website_issue                          website_issue[]
+  website_organizationadmin              website_organizationadmin[]
+  website_points                         website_points[]
+  website_userprofile_subscribed_domains website_userprofile_subscribed_domains[]
+
+  @@index([organization_id], map: "domain_org_idx")
+  @@index([name], map: "website_domain_name_7e5203d6_like")
+  @@index([organization_id], map: "website_domain_organization_id_eda1fc4e")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_domain_managers {
+  id             Int            @id @default(autoincrement())
+  domain_id      Int
+  user_id        Int
+  website_domain website_domain @relation(fields: [domain_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_domain_managers_domain_id_f823b107_fk_website_domain_id")
+  auth_user      auth_user      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_domain_managers_user_id_adda8e71_fk_auth_user_id")
+
+  @@unique([domain_id, user_id], map: "website_domain_managers_domain_id_user_id_7dbbdbe3_uniq")
+  @@index([domain_id], map: "website_domain_managers_domain_id_f823b107")
+  @@index([user_id], map: "website_domain_managers_user_id_adda8e71")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_domain_tags {
+  id             Int            @id @default(autoincrement())
+  domain_id      Int
+  tag_id         Int
+  website_domain website_domain @relation(fields: [domain_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_domain_tags_domain_id_6bd48f05_fk_website_domain_id")
+  website_tag    website_tag    @relation(fields: [tag_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_domain_tags_tag_id_9958065e_fk_website_tag_id")
+
+  @@unique([domain_id, tag_id], map: "website_domain_tags_domain_id_tag_id_af191227_uniq")
+  @@index([domain_id], map: "website_domain_tags_domain_id_6bd48f05")
+  @@index([tag_id], map: "website_domain_tags_tag_id_9958065e")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_enrollment {
+  id                  Int                 @id @default(autoincrement())
+  enrolled_at         DateTime            @db.Timestamptz(6)
+  completed           Boolean
+  last_accessed       DateTime            @db.Timestamptz(6)
+  course_id           Int
+  student_id          Int
+  website_course      website_course      @relation(fields: [course_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_enrollment_course_id_e42cb066_fk_website_course_id")
+  website_userprofile website_userprofile @relation(fields: [student_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_enrollment_student_id_25d01016_fk_website_u")
+
+  @@unique([student_id, course_id], map: "website_enrollment_student_id_course_id_0a86fd16_uniq")
+  @@index([course_id], map: "website_enrollment_course_id_e42cb066")
+  @@index([student_id], map: "website_enrollment_student_id_25d01016")
+}
+
+model website_forumcategory {
+  id                Int                 @id(map: "website_suggestioncategory_pkey") @default(autoincrement())
+  name              String              @db.VarChar(100)
+  description       String?
+  created           DateTime            @db.Timestamptz(6)
+  website_forumpost website_forumpost[]
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_forumcomment {
+  id                         Int                    @id(map: "website_suggestioncomment_pkey") @default(autoincrement())
+  content                    String
+  created                    DateTime               @db.Timestamptz(6)
+  last_modified              DateTime               @db.Timestamptz(6)
+  parent_id                  Int?
+  post_id                    Int
+  user_id                    Int
+  website_forumcomment       website_forumcomment?  @relation("website_forumcommentTowebsite_forumcomment", fields: [parent_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_forumcomment_parent_id_f8fd3116_fk_website_f")
+  other_website_forumcomment website_forumcomment[] @relation("website_forumcommentTowebsite_forumcomment")
+  website_forumpost          website_forumpost      @relation(fields: [post_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_forumcomment_post_id_14b49ed2_fk_website_forumpost_id")
+  auth_user                  auth_user              @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_suggestioncomment_user_id_557c80a9_fk_auth_user_id")
+
+  @@index([parent_id], map: "website_suggestioncomment_parent_id_9f11d0b6")
+  @@index([post_id], map: "website_suggestioncomment_suggestion_id_0dbf69e3")
+  @@index([user_id], map: "website_suggestioncomment_user_id_557c80a9")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_forumpost {
+  id                    Int                    @id(map: "website_suggestion_pkey") @default(autoincrement())
+  title                 String                 @db.VarChar(200)
+  description           String?
+  up_votes              Int?
+  down_votes            Int?
+  created               DateTime               @db.Timestamptz(6)
+  user_id               Int?
+  is_pinned             Boolean
+  last_modified         DateTime               @db.Timestamptz(6)
+  status                String                 @db.VarChar(20)
+  category_id           Int?
+  organization_id       Int?
+  project_id            Int?
+  repo_id               Int?
+  website_forumcomment  website_forumcomment[]
+  website_organization  website_organization?  @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_forumpost_organization_id_072bf1e4_fk_website_o")
+  website_project       website_project?       @relation(fields: [project_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_forumpost_project_id_d8f6d2f5_fk_website_project_id")
+  website_repo          website_repo?          @relation(fields: [repo_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_forumpost_repo_id_a10c285a_fk_website_repo_id")
+  website_forumcategory website_forumcategory? @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_suggestion_category_id_19bc0d1f_fk_website_f")
+  auth_user             auth_user?             @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_suggestion_user_id_c6d46989_fk_auth_user_id")
+  website_forumvote     website_forumvote[]
+
+  @@index([organization_id], map: "website_forumpost_organization_id_072bf1e4")
+  @@index([project_id], map: "website_forumpost_project_id_d8f6d2f5")
+  @@index([repo_id], map: "website_forumpost_repo_id_a10c285a")
+  @@index([category_id], map: "website_suggestion_category_id_19bc0d1f")
+  @@index([user_id], map: "website_suggestion_user_id_c6d46989")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_forumvote {
+  id                Int               @id(map: "website_suggestionvotes_pkey") @default(autoincrement())
+  up_vote           Boolean
+  down_vote         Boolean
+  created           DateTime          @db.Timestamptz(6)
+  post_id           Int
+  user_id           Int?
+  website_forumpost website_forumpost @relation(fields: [post_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_forumvote_post_id_2cc69f57_fk_website_forumpost_id")
+  auth_user         auth_user?        @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_suggestionvotes_user_id_d677eb12_fk_auth_user_id")
+
+  @@index([post_id], map: "website_suggestionvotes_suggestion_id_aa0701f2")
+  @@index([user_id], map: "website_suggestionvotes_user_id_d677eb12")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_githubcomment {
+  id                  Int                  @id @default(autoincrement())
+  comment_id          BigInt               @unique
+  body                String
+  comment_type        String               @db.VarChar(50)
+  created_at          DateTime             @db.Timestamptz(6)
+  updated_at          DateTime             @db.Timestamptz(6)
+  url                 String               @db.VarChar(200)
+  github_issue_id     Int?
+  user_profile_id     Int?
+  contributor_id      Int?
+  repo_id             Int?
+  website_contributor website_contributor? @relation(fields: [contributor_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_githubcommen_contributor_id_52a50ed7_fk_website_c")
+  website_githubissue website_githubissue? @relation(fields: [github_issue_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_githubcommen_github_issue_id_4ff0d22c_fk_website_g")
+  website_userprofile website_userprofile? @relation(fields: [user_profile_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_githubcommen_user_profile_id_a528d308_fk_website_u")
+  website_repo        website_repo?        @relation(fields: [repo_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_githubcomment_repo_id_ec0837b7_fk_website_repo_id")
+
+  @@index([comment_id], map: "website_git_comment_idx")
+  @@index([contributor_id, created_at(sort: Desc)], map: "website_git_contrib_idx")
+  @@index([user_profile_id, created_at(sort: Desc)], map: "website_git_user_pr_idx")
+  @@index([contributor_id], map: "website_githubcomment_contributor_id_52a50ed7")
+  @@index([github_issue_id], map: "website_githubcomment_github_issue_id_4ff0d22c")
+  @@index([repo_id], map: "website_githubcomment_repo_id_ec0837b7")
+  @@index([user_profile_id], map: "website_githubcomment_user_profile_id_a528d308")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_githubissue {
+  id                                                                                                                         Int                                        @id @default(autoincrement())
+  issue_id                                                                                                                   BigInt
+  title                                                                                                                      String                                     @db.VarChar(255)
+  body                                                                                                                       String?
+  state                                                                                                                      String                                     @db.VarChar(50)
+  type                                                                                                                       String                                     @db.VarChar(50)
+  created_at                                                                                                                 DateTime                                   @db.Timestamptz(6)
+  updated_at                                                                                                                 DateTime                                   @db.Timestamptz(6)
+  closed_at                                                                                                                  DateTime?                                  @db.Timestamptz(6)
+  merged_at                                                                                                                  DateTime?                                  @db.Timestamptz(6)
+  is_merged                                                                                                                  Boolean
+  url                                                                                                                        String                                     @db.VarChar(200)
+  repo_id                                                                                                                    Int?
+  user_profile_id                                                                                                            Int?
+  bch_tx_id                                                                                                                  String?                                    @db.VarChar(255)
+  p2p_amount_bch                                                                                                             Decimal?                                   @db.Decimal(18, 8)
+  p2p_amount_usd                                                                                                             Decimal?                                   @db.Decimal(10, 2)
+  p2p_payment_created_at                                                                                                     DateTime?                                  @db.Timestamptz(6)
+  sent_by_user_id                                                                                                            Int?
+  has_dollar_tag                                                                                                             Boolean
+  sponsors_tx_id                                                                                                             String?                                    @db.VarChar(255)
+  contributor_id                                                                                                             Int?
+  assignee_id                                                                                                                Int?
+  website_githubcomment                                                                                                      website_githubcomment[]
+  website_contributor_website_githubissue_assignee_idTowebsite_contributor                                                   website_contributor?                       @relation("website_githubissue_assignee_idTowebsite_contributor", fields: [assignee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_githubissue_assignee_id_7afd2523_fk_website_c")
+  website_contributor_website_githubissue_contributor_idTowebsite_contributor                                                website_contributor?                       @relation("website_githubissue_contributor_idTowebsite_contributor", fields: [contributor_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_githubissue_contributor_id_7fbc4a76_fk_website_c")
+  website_repo                                                                                                               website_repo?                              @relation(fields: [repo_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_githubissue_repo_id_8c42d094_fk_website_repo_id")
+  auth_user                                                                                                                  auth_user?                                 @relation(fields: [sent_by_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_githubissue_sent_by_user_id_38da8a76_fk_auth_user_id")
+  website_userprofile                                                                                                        website_userprofile?                       @relation(fields: [user_profile_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_githubissue_user_profile_id_5bd34bba_fk_website_u")
+  website_githubissue_linked_pull_requests_website_githubissue_linked_pull_requests_from_githubissue_idTowebsite_githubissue website_githubissue_linked_pull_requests[] @relation("website_githubissue_linked_pull_requests_from_githubissue_idTowebsite_githubissue")
+  website_githubissue_linked_pull_requests_website_githubissue_linked_pull_requests_to_githubissue_idTowebsite_githubissue   website_githubissue_linked_pull_requests[] @relation("website_githubissue_linked_pull_requests_to_githubissue_idTowebsite_githubissue")
+  website_githubreview                                                                                                       website_githubreview[]
+
+  @@unique([issue_id, repo_id], map: "website_githubissue_issue_id_repo_id_7e05158d_uniq")
+  @@index([assignee_id], map: "website_githubissue_assignee_id_7afd2523")
+  @@index([contributor_id], map: "website_githubissue_contributor_id_7fbc4a76")
+  @@index([repo_id], map: "website_githubissue_repo_id_8c42d094")
+  @@index([sent_by_user_id], map: "website_githubissue_sent_by_user_id_38da8a76")
+  @@index([user_profile_id], map: "website_githubissue_user_profile_id_5bd34bba")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_githubissue_linked_pull_requests {
+  id                                                                                                    Int                 @id @default(autoincrement())
+  from_githubissue_id                                                                                   Int
+  to_githubissue_id                                                                                     Int
+  website_githubissue_website_githubissue_linked_pull_requests_from_githubissue_idTowebsite_githubissue website_githubissue @relation("website_githubissue_linked_pull_requests_from_githubissue_idTowebsite_githubissue", fields: [from_githubissue_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_githubissue__from_githubissue_id_02b3ae42_fk_website_g")
+  website_githubissue_website_githubissue_linked_pull_requests_to_githubissue_idTowebsite_githubissue   website_githubissue @relation("website_githubissue_linked_pull_requests_to_githubissue_idTowebsite_githubissue", fields: [to_githubissue_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_githubissue__to_githubissue_id_7dcc0c80_fk_website_g")
+
+  @@unique([from_githubissue_id, to_githubissue_id], map: "website_githubissue_link_from_githubissue_id_to_g_4d857456_uniq")
+  @@index([from_githubissue_id], map: "website_githubissue_linked_from_githubissue_id_02b3ae42")
+  @@index([to_githubissue_id], map: "website_githubissue_linked_to_githubissue_id_7dcc0c80")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_githubreview {
+  id                      Int                  @id @default(autoincrement())
+  review_id               BigInt               @unique
+  body                    String?
+  state                   String               @db.VarChar(50)
+  submitted_at            DateTime             @db.Timestamptz(6)
+  url                     String               @db.VarChar(200)
+  pull_request_id         Int
+  reviewer_id             Int?
+  reviewer_contributor_id Int?
+  website_githubissue     website_githubissue  @relation(fields: [pull_request_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_githubreview_pull_request_id_6b8077d0_fk_website_g")
+  website_contributor     website_contributor? @relation(fields: [reviewer_contributor_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_githubreview_reviewer_contributor_0f6421bb_fk_website_c")
+  website_userprofile     website_userprofile? @relation(fields: [reviewer_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_githubreview_reviewer_id_edb6a03b_fk_website_u")
+
+  @@index([pull_request_id], map: "website_githubreview_pull_request_id_6b8077d0")
+  @@index([reviewer_contributor_id], map: "website_githubreview_reviewer_contributor_id_0f6421bb")
+  @@index([reviewer_id], map: "website_githubreview_reviewer_id_edb6a03b")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_hackathon {
+  id                             Int                              @id @default(autoincrement())
+  name                           String                           @db.VarChar(255)
+  slug                           String                           @unique(map: "unique_hackathon_slug") @db.VarChar(255)
+  description                    String
+  start_time                     DateTime                         @db.Timestamptz(6)
+  end_time                       DateTime                         @db.Timestamptz(6)
+  banner_image                   String?                          @db.VarChar(100)
+  created                        DateTime                         @db.Timestamptz(6)
+  modified                       DateTime                         @db.Timestamptz(6)
+  is_active                      Boolean
+  rules                          String?
+  registration_open              Boolean
+  max_participants               Int?
+  organization_id                Int
+  sponsor_link                   String?                          @db.VarChar(200)
+  sponsor_note                   String?
+  website_organization           website_organization             @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_hackathon_organization_id_bb74e7c4_fk_website_o")
+  website_hackathon_repositories website_hackathon_repositories[]
+  website_hackathonprize         website_hackathonprize[]
+  website_hackathonsponsor       website_hackathonsponsor[]
+
+  @@index([organization_id], map: "hackathon_org_idx")
+  @@index([start_time], map: "hackathon_start_idx")
+  @@index([organization_id], map: "website_hackathon_organization_id_bb74e7c4")
+  @@index([slug], map: "website_hackathon_slug_3e94bcd3_like")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_hackathon_repositories {
+  id                Int               @id @default(autoincrement())
+  hackathon_id      Int
+  repo_id           Int
+  website_hackathon website_hackathon @relation(fields: [hackathon_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_hackathon_re_hackathon_id_cb9398e8_fk_website_h")
+  website_repo      website_repo      @relation(fields: [repo_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_hackathon_re_repo_id_b923fd91_fk_website_r")
+
+  @@unique([hackathon_id, repo_id], map: "website_hackathon_reposi_hackathon_id_repo_id_6ef70a63_uniq")
+  @@index([hackathon_id], map: "website_hackathon_repositories_hackathon_id_cb9398e8")
+  @@index([repo_id], map: "website_hackathon_repositories_repo_id_b923fd91")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_hackathonprize {
+  id                       Int                       @id @default(autoincrement())
+  position                 Int
+  title                    String                    @db.VarChar(255)
+  description              String
+  value                    Decimal?                  @db.Decimal(10, 2)
+  hackathon_id             Int
+  sponsor_id               Int?
+  website_hackathon        website_hackathon         @relation(fields: [hackathon_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_hackathonpri_hackathon_id_76ea378e_fk_website_h")
+  website_hackathonsponsor website_hackathonsponsor? @relation(fields: [sponsor_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_hackathonpri_sponsor_id_18231a7c_fk_website_h")
+
+  @@unique([hackathon_id, position], map: "website_hackathonprize_hackathon_id_position_765960c5_uniq")
+  @@index([hackathon_id], map: "website_hackathonprize_hackathon_id_76ea378e")
+  @@index([sponsor_id], map: "website_hackathonprize_sponsor_id_18231a7c")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_hackathonsponsor {
+  id                     Int                      @id @default(autoincrement())
+  sponsor_level          String                   @db.VarChar(20)
+  logo                   String?                  @db.VarChar(100)
+  website                String?                  @db.VarChar(200)
+  created                DateTime                 @db.Timestamptz(6)
+  hackathon_id           Int
+  organization_id        Int
+  website_hackathonprize website_hackathonprize[]
+  website_hackathon      website_hackathon        @relation(fields: [hackathon_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_hackathonspo_hackathon_id_b8cb53d1_fk_website_h")
+  website_organization   website_organization     @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_hackathonspo_organization_id_72e3be7c_fk_website_o")
+
+  @@unique([hackathon_id, organization_id], map: "website_hackathonsponsor_hackathon_id_organizatio_e36e1107_uniq")
+  @@index([hackathon_id], map: "website_hackathonsponsor_hackathon_id_b8cb53d1")
+  @@index([organization_id], map: "website_hackathonsponsor_organization_id_72e3be7c")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_hunt {
+  id                  Int                 @id @default(autoincrement())
+  url                 String              @db.VarChar(200)
+  prize               Int?
+  logo                String?             @db.VarChar(100)
+  plan                String              @db.VarChar(10)
+  created             DateTime            @db.Timestamptz(6)
+  modified            DateTime            @db.Timestamptz(6)
+  color               String?             @db.VarChar(10)
+  txn_id              String?             @db.VarChar(50)
+  domain_id           Int
+  is_published        Boolean
+  end_on              DateTime?           @db.Timestamptz(6)
+  starts_on           DateTime?           @db.Timestamptz(6)
+  description         String?
+  name                String              @db.VarChar(25)
+  prize_runner        Decimal             @db.Decimal(6, 2)
+  prize_second_runner Decimal             @db.Decimal(6, 2)
+  prize_winner        Decimal             @db.Decimal(6, 2)
+  result_published    Boolean
+  banner              String?             @db.VarChar(100)
+  website_domain      website_domain      @relation(fields: [domain_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_hunt_domain_id_acd27f5e_fk_website_domain_id")
+  website_huntprize   website_huntprize[]
+  website_issue       website_issue[]
+  website_winner      website_winner[]
+
+  @@index([domain_id], map: "website_hunt_domain_id_acd27f5e")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_huntprize {
+  id                         Int              @id @default(autoincrement())
+  name                       String           @db.VarChar(50)
+  value                      Int
+  no_of_eligible_projects    Int
+  valid_submissions_eligible Boolean
+  prize_in_crypto            Boolean
+  description                String?
+  hunt_id                    Int
+  created                    DateTime         @db.Timestamptz(6)
+  website_hunt               website_hunt     @relation(fields: [hunt_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_huntprize_hunt_id_db361f26_fk_website_hunt_id")
+  website_winner             website_winner[]
+
+  @@index([hunt_id], map: "website_huntprize_hunt_id_db361f26")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_integration {
+  id                                Int                                 @id @default(autoincrement())
+  service_name                      String?                             @db.VarChar(20)
+  created_at                        DateTime                            @db.Timestamptz(6)
+  organization_id                   Int
+  website_organization              website_organization                @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_integration_organization_id_ea22f9d4_fk_website_o")
+  website_organization_integrations website_organization_integrations[]
+  website_slackintegration          website_slackintegration?
+
+  @@index([organization_id], map: "website_integration_organization_id_ea22f9d4")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_invitefriend {
+  id                              Int                               @id @default(autoincrement())
+  sender_id                       Int
+  point_by_referral               Int
+  referral_code                   String                            @db.VarChar(100)
+  created                         DateTime                          @db.Timestamptz(6)
+  auth_user                       auth_user                         @relation(fields: [sender_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_invitefriend_sender_id_487d5d3e_fk_auth_user_id")
+  website_invitefriend_recipients website_invitefriend_recipients[]
+
+  @@index([sender_id], map: "website_invitefriend_sender_id_487d5d3e")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_invitefriend_recipients {
+  id                   Int                  @id @default(autoincrement())
+  invitefriend_id      Int
+  user_id              Int
+  website_invitefriend website_invitefriend @relation(fields: [invitefriend_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_invitefriend_invitefriend_id_ed41f289_fk_website_i")
+  auth_user            auth_user            @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_invitefriend_user_id_a78a5385_fk_auth_user")
+
+  @@unique([invitefriend_id, user_id], map: "website_invitefriend_rec_invitefriend_id_user_id_ccd3874c_uniq")
+  @@index([invitefriend_id], map: "website_invitefriend_recipients_invitefriend_id_ed41f289")
+  @@index([user_id], map: "website_invitefriend_recipients_user_id_a78a5385")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_inviteorganization {
+  id                   Int                   @id @default(autoincrement())
+  email                String                @db.VarChar(254)
+  organization_name    String                @db.VarChar(255)
+  referral_code        String                @unique @db.VarChar(100)
+  points_awarded       Boolean
+  created              DateTime              @db.Timestamptz(6)
+  organization_id      Int?
+  sender_id            Int?
+  website_organization website_organization? @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_inviteorgani_organization_id_5ebaecf2_fk_website_o")
+  auth_user            auth_user?            @relation(fields: [sender_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_inviteorganization_sender_id_ca3ffac0_fk_auth_user_id")
+
+  @@index([organization_id], map: "website_inviteorganization_organization_id_5ebaecf2")
+  @@index([referral_code], map: "website_inviteorganization_referral_code_a4bcff36_like")
+  @@index([sender_id], map: "website_inviteorganization_sender_id_ca3ffac0")
+}
+
+model website_ip {
+  id          Int      @id @default(autoincrement())
+  address     String?  @db.VarChar(39)
+  user        String?  @db.VarChar(150)
+  issuenumber Int?
+  created     DateTime @db.Timestamptz(6)
+  count       BigInt
+  method      String?  @db.VarChar(10)
+  path        String?  @db.VarChar(255)
+  referer     String?  @db.VarChar(255)
+  agent       String?
+
+  @@index([path, created], map: "ip_path_created_idx")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_ipreport {
+  id                  Int        @id @default(autoincrement())
+  activity_title      String     @db.VarChar(255)
+  activity_type       String     @db.VarChar(50)
+  ip_address          String     @db.Inet
+  ip_type             String     @db.VarChar(10)
+  description         String
+  created             DateTime   @db.Timestamptz(6)
+  reporter_ip_address String?    @db.Inet
+  user_id             Int?
+  auth_user           auth_user? @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_ipreport_user_id_9a8ef495_fk_auth_user_id")
+
+  @@index([user_id], map: "website_ipreport_user_id_9a8ef495")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_issue {
+  id                                              Int                                   @id @default(autoincrement())
+  url                                             String                                @db.VarChar(200)
+  description                                     String
+  screenshot                                      String?                               @db.VarChar(100)
+  created                                         DateTime                              @db.Timestamptz(6)
+  modified                                        DateTime                              @db.Timestamptz(6)
+  user_id                                         Int?
+  domain_id                                       Int?
+  ocr                                             String?
+  status                                          String?                               @db.VarChar(10)
+  user_agent                                      String?                               @db.VarChar(255)
+  views                                           Int?
+  label                                           Int                                   @db.SmallInt
+  closed_by_id                                    Int?
+  closed_date                                     DateTime?                             @db.Timestamptz(6)
+  github_url                                      String?                               @db.VarChar(200)
+  hunt_id                                         Int?
+  score                                           Int?
+  verified                                        Boolean
+  is_hidden                                       Boolean
+  markdown_description                            String?
+  rewarded                                        Int
+  reporter_ip_address                             String?                               @db.Inet
+  cve_id                                          String?                               @db.VarChar(16)
+  cve_score                                       Decimal?                              @db.Decimal(2, 1)
+  auth_user_website_issue_closed_by_idToauth_user auth_user?                            @relation("website_issue_closed_by_idToauth_user", fields: [closed_by_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_issue_closed_by_id_055e3c88_fk_auth_user_id")
+  website_domain                                  website_domain?                       @relation(fields: [domain_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_issue_domain_id_094cf7af_fk_website_domain_id")
+  website_hunt                                    website_hunt?                         @relation(fields: [hunt_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_issue_hunt_id_e671312a_fk_website_hunt_id")
+  auth_user_website_issue_user_idToauth_user      auth_user?                            @relation("website_issue_user_idToauth_user", fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_issue_user_id_17072c39_fk_auth_user_id")
+  website_issue_tags                              website_issue_tags[]
+  website_issue_team_members                      website_issue_team_members[]
+  website_issuescreenshot                         website_issuescreenshot[]
+  website_points                                  website_points[]
+  website_userprofile_issue_downvoted             website_userprofile_issue_downvoted[]
+  website_userprofile_issue_flaged                website_userprofile_issue_flaged[]
+  website_userprofile_issue_saved                 website_userprofile_issue_saved[]
+  website_userprofile_issue_upvoted               website_userprofile_issue_upvoted[]
+
+  @@index([domain_id, status], map: "issue_domain_status_idx")
+  @@index([closed_by_id], map: "website_issue_closed_by_id_055e3c88")
+  @@index([domain_id], map: "website_issue_domain_id_094cf7af")
+  @@index([hunt_id], map: "website_issue_hunt_id_e671312a")
+  @@index([user_id], map: "website_issue_user_id_17072c39")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_issue_tags {
+  id            Int           @id @default(autoincrement())
+  issue_id      Int
+  tag_id        Int
+  website_issue website_issue @relation(fields: [issue_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_issue_tags_issue_id_b4c220b5_fk_website_issue_id")
+  website_tag   website_tag   @relation(fields: [tag_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_issue_tags_tag_id_1f01b443_fk_website_tag_id")
+
+  @@unique([issue_id, tag_id], map: "website_issue_tags_issue_id_tag_id_5dbeec9c_uniq")
+  @@index([issue_id], map: "website_issue_tags_issue_id_b4c220b5")
+  @@index([tag_id], map: "website_issue_tags_tag_id_1f01b443")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_issue_team_members {
+  id            Int           @id @default(autoincrement())
+  issue_id      Int
+  user_id       Int
+  website_issue website_issue @relation(fields: [issue_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_issue_team_m_issue_id_6244945d_fk_website_i")
+  auth_user     auth_user     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_issue_team_members_user_id_cd52e034_fk_auth_user_id")
+
+  @@unique([issue_id, user_id], map: "website_issue_team_members_issue_id_user_id_b9e9aa9b_uniq")
+  @@index([issue_id], map: "website_issue_team_members_issue_id_6244945d")
+  @@index([user_id], map: "website_issue_team_members_user_id_cd52e034")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_issuescreenshot {
+  id            Int           @id @default(autoincrement())
+  image         String        @db.VarChar(100)
+  issue_id      Int
+  created       DateTime      @db.Timestamptz(6)
+  website_issue website_issue @relation(fields: [issue_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_issuescreenshot_issue_id_ee869b83_fk_website_issue_id")
+
+  @@index([issue_id], map: "website_issuescreenshot_issue_id_ee869b83")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_job {
+  id                       Int                  @id @default(autoincrement())
+  title                    String               @db.VarChar(255)
+  description              String
+  requirements             String?
+  location                 String?              @db.VarChar(255)
+  job_type                 String               @db.VarChar(20)
+  salary_range             String?              @db.VarChar(100)
+  is_public                Boolean
+  status                   String               @db.VarChar(20)
+  expires_at               DateTime?            @db.Timestamptz(6)
+  application_email        String?              @db.VarChar(254)
+  application_url          String?              @db.VarChar(200)
+  application_instructions String?
+  created_at               DateTime             @db.Timestamptz(6)
+  updated_at               DateTime             @db.Timestamptz(6)
+  views_count              Int
+  organization_id          Int
+  posted_by_id             Int?
+  website_organization     website_organization @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_job_organization_id_d59b0a66_fk_website_organization_id")
+  auth_user                auth_user?           @relation(fields: [posted_by_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_job_posted_by_id_26a0e53e_fk_auth_user_id")
+
+  @@index([created_at(sort: Desc)], map: "job_created_idx")
+  @@index([organization_id, is_public, status], map: "job_org_pub_status_idx")
+  @@index([is_public, status], map: "job_public_status_idx")
+  @@index([organization_id], map: "website_job_organization_id_d59b0a66")
+  @@index([posted_by_id], map: "website_job_posted_by_id_26a0e53e")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_joinrequest {
+  id                   Int                   @id @default(autoincrement())
+  created_at           DateTime              @db.Timestamptz(6)
+  is_accepted          Boolean
+  team_id              Int?
+  user_id              Int
+  website_organization website_organization? @relation(fields: [team_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_joinrequest_team_id_f3946970_fk_website_organization_id")
+  auth_user            auth_user             @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_joinrequest_user_id_916eb4fd_fk_auth_user_id")
+
+  @@index([team_id], map: "website_joinrequest_team_id_f3946970")
+  @@index([user_id], map: "website_joinrequest_user_id_916eb4fd")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_kudos {
+  id                                             Int       @id @default(autoincrement())
+  timestamp                                      DateTime  @db.Timestamptz(6)
+  link                                           String?   @db.VarChar(200)
+  comment                                        String?
+  receiver_id                                    Int
+  sender_id                                      Int
+  auth_user_website_kudos_receiver_idToauth_user auth_user @relation("website_kudos_receiver_idToauth_user", fields: [receiver_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_kudos_receiver_id_d63b47c5_fk_auth_user_id")
+  auth_user_website_kudos_sender_idToauth_user   auth_user @relation("website_kudos_sender_idToauth_user", fields: [sender_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_kudos_sender_id_eafd8786_fk_auth_user_id")
+
+  @@index([receiver_id], map: "website_kudos_receiver_id_d63b47c5")
+  @@index([sender_id], map: "website_kudos_sender_id_eafd8786")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model website_labs {
+  id                      Int                       @id @default(autoincrement())
+  name                    String                    @db.VarChar(255)
+  description             String
+  estimated_time          Int
+  total_tasks             Int
+  is_active               Boolean
+  order                   Int
+  created_at              DateTime                  @db.Timestamptz(6)
+  updated_at              DateTime                  @db.Timestamptz(6)
+  website_tasks           website_tasks[]
+  website_userlabprogress website_userlabprogress[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_lecture {
+  id                    Int                     @id @default(autoincrement())
+  title                 String                  @db.VarChar(200)
+  description           String?
+  content_type          String                  @db.VarChar(10)
+  video_url             String?                 @db.VarChar(200)
+  live_url              String?                 @db.VarChar(200)
+  scheduled_time        DateTime?               @db.Timestamptz(6)
+  recording_url         String?                 @db.VarChar(200)
+  content               String?
+  duration              Int?
+  order                 Int
+  instructor_id         Int?
+  section_id            Int?
+  website_userprofile   website_userprofile?    @relation(fields: [instructor_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_lecture_instructor_id_9a5bceeb_fk_website_u")
+  website_section       website_section?        @relation(fields: [section_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_lecture_section_id_d320647c_fk_website_section_id")
+  website_lecture_tags  website_lecture_tags[]
+  website_lecturestatus website_lecturestatus[]
+
+  @@index([instructor_id], map: "website_lecture_instructor_id_9a5bceeb")
+  @@index([section_id], map: "website_lecture_section_id_d320647c")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_lecture_tags {
+  id              Int             @id @default(autoincrement())
+  lecture_id      Int
+  tag_id          Int
+  website_lecture website_lecture @relation(fields: [lecture_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_lecture_tags_lecture_id_05a2b5a4_fk_website_lecture_id")
+  website_tag     website_tag     @relation(fields: [tag_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_lecture_tags_tag_id_b15c5e60_fk_website_tag_id")
+
+  @@unique([lecture_id, tag_id], map: "website_lecture_tags_lecture_id_tag_id_aa9441b2_uniq")
+  @@index([lecture_id], map: "website_lecture_tags_lecture_id_05a2b5a4")
+  @@index([tag_id], map: "website_lecture_tags_tag_id_b15c5e60")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_lecturestatus {
+  id                  Int                 @id @default(autoincrement())
+  status              String              @db.VarChar(15)
+  lecture_id          Int
+  student_id          Int
+  website_userprofile website_userprofile @relation(fields: [student_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_lecturestatu_student_id_7b195c2a_fk_website_u")
+  website_lecture     website_lecture     @relation(fields: [lecture_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_lecturestatus_lecture_id_46e0d90f_fk_website_lecture_id")
+
+  @@index([lecture_id], map: "website_lecturestatus_lecture_id_46e0d90f")
+  @@index([student_id], map: "website_lecturestatus_student_id_7b195c2a")
+}
+
+model website_managementcommandlog {
+  id             Int       @id @default(autoincrement())
+  command_name   String    @db.VarChar(255)
+  last_run       DateTime  @db.Timestamptz(6)
+  success        Boolean
+  error_message  String?
+  run_count      Int
+  execution_time Float?
+  file_modified  DateTime? @db.Timestamptz(6)
+  file_path      String?   @db.VarChar(512)
+  github_url     String?   @db.VarChar(512)
+  output         String?
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_message {
+  id             Int             @id @default(autoincrement())
+  username       String          @db.VarChar(255)
+  content        String
+  timestamp      DateTime        @db.Timestamptz(6)
+  session_key    String?         @db.VarChar(40)
+  room_id        Int?
+  user_id        Int?
+  thread_id      Int?
+  reactions      Json
+  website_room   website_room?   @relation(fields: [room_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_message_room_id_96069f7d_fk_website_room_id")
+  website_thread website_thread? @relation(fields: [thread_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_message_thread_id_56a63572_fk_website_thread_id")
+  auth_user      auth_user?      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_message_user_id_30c257c0_fk_auth_user_id")
+
+  @@index([room_id], map: "website_message_room_id_96069f7d")
+  @@index([thread_id], map: "website_message_thread_id_56a63572")
+  @@index([user_id], map: "website_message_user_id_30c257c0")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_monitor {
+  id                Int       @id @default(autoincrement())
+  url               String    @db.VarChar(200)
+  keyword           String    @db.VarChar(255)
+  last_checked_time DateTime  @db.Timestamptz(6)
+  status            String    @db.VarChar(20)
+  user_id           Int
+  created           DateTime  @db.Timestamptz(6)
+  modified          DateTime  @db.Timestamptz(6)
+  auth_user         auth_user @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_monitor_user_id_8d02f4ee_fk_auth_user_id")
+
+  @@index([user_id], map: "website_monitor_user_id_8d02f4ee")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model website_newsletter {
+  id                   Int       @id @default(autoincrement())
+  title                String    @db.VarChar(255)
+  slug                 String    @unique @db.VarChar(50)
+  content              String
+  featured_image       String?   @db.VarChar(100)
+  created_at           DateTime  @db.Timestamptz(6)
+  updated_at           DateTime  @db.Timestamptz(6)
+  published_at         DateTime? @db.Timestamptz(6)
+  status               String    @db.VarChar(10)
+  recent_bugs_section  Boolean
+  leaderboard_section  Boolean
+  reported_ips_section Boolean
+  email_subject        String?   @db.VarChar(255)
+  email_sent           Boolean
+  email_sent_at        DateTime? @db.Timestamptz(6)
+  view_count           Int
+
+  @@index([slug], map: "website_newsletter_slug_cc7ad867_like")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_newslettersubscriber {
+  id                        Int        @id @default(autoincrement())
+  email                     String     @unique @db.VarChar(254)
+  name                      String?    @db.VarChar(100)
+  subscribed_at             DateTime   @db.Timestamptz(6)
+  is_active                 Boolean
+  confirmation_token        String     @db.Uuid
+  confirmed                 Boolean
+  token_created_at          DateTime   @db.Timestamptz(6)
+  wants_bug_reports         Boolean
+  wants_leaderboard_updates Boolean
+  wants_security_news       Boolean
+  user_id                   Int?
+  auth_user                 auth_user? @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_newslettersubscriber_user_id_6407f379_fk_auth_user_id")
+
+  @@index([email], map: "website_newslettersubscriber_email_0ddff1bb_like")
+  @@index([user_id], map: "website_newslettersubscriber_user_id_6407f379")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_notification {
+  id                Int       @id @default(autoincrement())
+  message           String
+  created_at        DateTime  @db.Timestamptz(6)
+  is_read           Boolean
+  is_deleted        Boolean
+  notification_type String    @db.VarChar(50)
+  link              String?   @db.VarChar(200)
+  user_id           Int
+  auth_user         auth_user @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_notification_user_id_d252e259_fk_auth_user_id")
+
+  @@index([user_id], map: "website_notification_user_id_d252e259")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_organization {
+  id                                  Int                                   @id @default(autoincrement())
+  name                                String                                @unique(map: "unique_organization_name") @db.VarChar(255)
+  description                         String?                               @db.VarChar(500)
+  logo                                String?                               @db.VarChar(255)
+  url                                 String                                @unique @db.VarChar(255)
+  email                               String?                               @db.VarChar(254)
+  twitter                             String?                               @db.VarChar(200)
+  facebook                            String?                               @db.VarChar(200)
+  created                             DateTime                              @db.Timestamptz(6)
+  modified                            DateTime                              @db.Timestamptz(6)
+  is_active                           Boolean
+  trademark_count                     Int
+  trademark_check_date                DateTime?                             @db.Timestamptz(6)
+  team_points                         Int
+  type                                String                                @db.VarChar(15)
+  admin_id                            Int?
+  subscription_id                     Int?
+  slug                                String                                @unique(map: "unique_organization_slug") @db.VarChar(255)
+  address_line_1                      String?                               @db.VarChar(255)
+  address_line_2                      String?                               @db.VarChar(255)
+  city                                String?                               @db.VarChar(100)
+  state                               String?                               @db.VarChar(100)
+  country                             String?                               @db.VarChar(100)
+  postal_code                         String?                               @db.VarChar(20)
+  latitude                            Decimal?                              @db.Decimal(9, 6)
+  longitude                           Decimal?                              @db.Decimal(9, 6)
+  categories                          Json
+  contributor_guidance_url            String?                               @db.VarChar(200)
+  ideas_link                          String?                               @db.VarChar(200)
+  license                             String?                               @db.VarChar(100)
+  source_code                         String?                               @db.VarChar(200)
+  tagline                             String?                               @db.VarChar(255)
+  tech_tags                           Json
+  topic_tags                          Json
+  discord_url                         String?                               @db.VarChar(200)
+  element_url                         String?                               @db.VarChar(200)
+  gitter_url                          String?                               @db.VarChar(200)
+  matrix_url                          String?                               @db.VarChar(200)
+  slack_url                           String?                               @db.VarChar(200)
+  zulipchat_url                       String?                               @db.VarChar(200)
+  repos_updated_at                    DateTime?                             @db.Timestamptz(6)
+  check_ins_enabled                   Boolean
+  github_org                          String?                               @db.VarChar(255)
+  gsoc_years                          String?                               @db.VarChar(255)
+  sizzle_timelog                      sizzle_timelog[]
+  website_challenge_team_participants website_challenge_team_participants[]
+  website_domain                      website_domain[]
+  website_forumpost                   website_forumpost[]
+  website_hackathon                   website_hackathon[]
+  website_hackathonsponsor            website_hackathonsponsor[]
+  website_integration                 website_integration[]
+  website_inviteorganization          website_inviteorganization[]
+  website_job                         website_job[]
+  website_joinrequest                 website_joinrequest[]
+  auth_user                           auth_user?                            @relation(fields: [admin_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_organization_admin_id_6a977aec_fk_auth_user_id")
+  website_subscription                website_subscription?                 @relation(fields: [subscription_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_organization_subscription_id_37c007d7_fk_website_s")
+  website_organization_integrations   website_organization_integrations[]
+  website_organization_managers       website_organization_managers[]
+  website_organization_tags           website_organization_tags[]
+  website_organizationadmin           website_organizationadmin[]
+  website_project                     website_project[]
+  website_repo                        website_repo[]
+  website_slackchannel                website_slackchannel[]
+  website_timelog                     website_timelog[]
+  website_trademark                   website_trademark[]
+  website_userprofile                 website_userprofile[]
+
+  @@index([created], map: "org_created_idx")
+  @@index([name], map: "org_name_idx")
+  @@index([admin_id], map: "website_organization_admin_id_6a977aec")
+  @@index([slug], map: "website_organization_slug_334d1fac_like")
+  @@index([subscription_id], map: "website_organization_subscription_id_37c007d7")
+  @@index([url], map: "website_organization_url_c6f19fe5_like")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_organization_integrations {
+  id                   Int                  @id @default(autoincrement())
+  organization_id      Int
+  integration_id       Int
+  website_integration  website_integration  @relation(fields: [integration_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_organization_integration_id_fb4f2626_fk_website_i")
+  website_organization website_organization @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_organization_organization_id_a4df7b52_fk_website_o")
+
+  @@unique([organization_id, integration_id], map: "website_organization_int_organization_id_integrat_40c63f18_uniq")
+  @@index([integration_id], map: "website_organization_integrations_integration_id_fb4f2626")
+  @@index([organization_id], map: "website_organization_integrations_organization_id_a4df7b52")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_organization_managers {
+  id                   Int                  @id @default(autoincrement())
+  organization_id      Int
+  user_id              Int
+  auth_user            auth_user            @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_organization_managers_user_id_be63888f_fk_auth_user_id")
+  website_organization website_organization @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_organization_organization_id_6d7e1464_fk_website_o")
+
+  @@unique([organization_id, user_id], map: "website_organization_man_organization_id_user_id_5d8bce28_uniq")
+  @@index([organization_id], map: "website_organization_managers_organization_id_6d7e1464")
+  @@index([user_id], map: "website_organization_managers_user_id_be63888f")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_organization_tags {
+  id                   Int                  @id @default(autoincrement())
+  organization_id      Int
+  tag_id               Int
+  website_organization website_organization @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_organization_organization_id_88a8c227_fk_website_o")
+  website_tag          website_tag          @relation(fields: [tag_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_organization_tags_tag_id_9d402cc3_fk_website_tag_id")
+
+  @@unique([organization_id, tag_id], map: "website_organization_tags_organization_id_tag_id_485f1da2_uniq")
+  @@index([organization_id], map: "website_organization_tags_organization_id_88a8c227")
+  @@index([tag_id], map: "website_organization_tags_tag_id_9d402cc3")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_organizationadmin {
+  id                   Int                   @id @default(autoincrement())
+  role                 Int
+  is_active            Boolean
+  created              DateTime              @db.Timestamptz(6)
+  domain_id            Int?
+  organization_id      Int?
+  user_id              Int?
+  website_domain       website_domain?       @relation(fields: [domain_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_organization_domain_id_e4968a80_fk_website_d")
+  website_organization website_organization? @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_organization_organization_id_24aaa1df_fk_website_o")
+  auth_user            auth_user?            @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_organizationadmin_user_id_7d8cd3d2_fk_auth_user_id")
+
+  @@index([domain_id], map: "website_organizationadmin_domain_id_e4968a80")
+  @@index([organization_id], map: "website_organizationadmin_organization_id_24aaa1df")
+  @@index([user_id], map: "website_organizationadmin_user_id_7d8cd3d2")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model website_ossharticle {
+  id                       Int                        @id @default(autoincrement())
+  title                    String                     @db.VarChar(255)
+  author                   String                     @db.VarChar(255)
+  author_profile_image     String?                    @db.VarChar(500)
+  description              String
+  publication_date         DateTime                   @db.Timestamptz(6)
+  source                   String                     @db.VarChar(255)
+  external_id              String                     @unique @db.VarChar(100)
+  url                      String?                    @db.VarChar(1000)
+  cover_image              String?                    @db.VarChar(1000)
+  reading_time_minutes     Int?
+  created_at               DateTime                   @db.Timestamptz(6)
+  updated_at               DateTime                   @db.Timestamptz(6)
+  website_ossharticle_tags website_ossharticle_tags[]
+
+  @@index([external_id], map: "website_ossharticle_external_id_490d2980_like")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_ossharticle_tags {
+  id                  Int                 @id @default(autoincrement())
+  ossharticle_id      Int
+  tag_id              Int
+  website_ossharticle website_ossharticle @relation(fields: [ossharticle_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_ossharticle__ossharticle_id_57cd272c_fk_website_o")
+  website_tag         website_tag         @relation(fields: [tag_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_ossharticle_tags_tag_id_99deccbc_fk_website_tag_id")
+
+  @@unique([ossharticle_id, tag_id], map: "website_ossharticle_tags_ossharticle_id_tag_id_05a03463_uniq")
+  @@index([ossharticle_id], map: "website_ossharticle_tags_ossharticle_id_57cd272c")
+  @@index([tag_id], map: "website_ossharticle_tags_tag_id_99deccbc")
+}
+
+model website_osshcommunity {
+  id                         Int                          @id @default(autoincrement())
+  name                       String                       @unique @db.VarChar(255)
+  description                String?
+  website                    String                       @unique @db.VarChar(200)
+  source                     String                       @db.VarChar(100)
+  category                   String                       @db.VarChar(20)
+  external_id                String?                      @unique @db.VarChar(255)
+  metadata                   Json
+  contributors_count         Int
+  created_at                 DateTime                     @db.Timestamptz(6)
+  updated_at                 DateTime                     @db.Timestamptz(6)
+  website_osshcommunity_tags website_osshcommunity_tags[]
+
+  @@index([external_id], map: "website_osshcommunity_external_id_60b3a85c_like")
+  @@index([name], map: "website_osshcommunity_name_17bc5fcb_like")
+  @@index([website], map: "website_osshcommunity_website_26b7baa3_like")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_osshcommunity_tags {
+  id                    Int                   @id @default(autoincrement())
+  osshcommunity_id      Int
+  tag_id                Int
+  website_osshcommunity website_osshcommunity @relation(fields: [osshcommunity_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_osshcommunit_osshcommunity_id_142912c4_fk_website_o")
+  website_tag           website_tag           @relation(fields: [tag_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_osshcommunity_tags_tag_id_16f430a4_fk_website_tag_id")
+
+  @@unique([osshcommunity_id, tag_id], map: "website_osshcommunity_ta_osshcommunity_id_tag_id_5e17cad9_uniq")
+  @@index([osshcommunity_id], map: "website_osshcommunity_tags_osshcommunity_id_142912c4")
+  @@index([tag_id], map: "website_osshcommunity_tags_tag_id_16f430a4")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model website_osshdiscussionchannel {
+  id                                 Int                                  @id @default(autoincrement())
+  name                               String                               @db.VarChar(200)
+  description                        String?
+  source                             String                               @db.VarChar(100)
+  external_id                        String                               @unique @db.VarChar(100)
+  member_count                       Int
+  invite_url                         String?                              @db.VarChar(200)
+  logo_url                           String?                              @db.VarChar(200)
+  created_at                         DateTime                             @db.Timestamptz(6)
+  updated_at                         DateTime                             @db.Timestamptz(6)
+  website_osshdiscussionchannel_tags website_osshdiscussionchannel_tags[]
+
+  @@index([external_id], map: "website_osshdiscussionchannel_external_id_682436d2_like")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_osshdiscussionchannel_tags {
+  id                            Int                           @id @default(autoincrement())
+  osshdiscussionchannel_id      Int
+  tag_id                        Int
+  website_osshdiscussionchannel website_osshdiscussionchannel @relation(fields: [osshdiscussionchannel_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_osshdiscussi_osshdiscussionchanne_755c2593_fk_website_o")
+  website_tag                   website_tag                   @relation(fields: [tag_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_osshdiscussi_tag_id_8aeb9a4a_fk_website_t")
+
+  @@unique([osshdiscussionchannel_id, tag_id], map: "website_osshdiscussionch_osshdiscussionchannel_id_69d0fe66_uniq")
+  @@index([osshdiscussionchannel_id], map: "website_osshdiscussionchan_osshdiscussionchannel_id_755c2593")
+  @@index([tag_id], map: "website_osshdiscussionchannel_tags_tag_id_8aeb9a4a")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_payment {
+  id             Int            @id @default(autoincrement())
+  value          Decimal        @db.Decimal(6, 2)
+  active         Boolean
+  wallet_id      Int
+  created        DateTime       @db.Timestamptz(6)
+  website_wallet website_wallet @relation(fields: [wallet_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_payment_wallet_id_4967fb90_fk_website_wallet_id")
+
+  @@index([wallet_id], map: "website_payment_wallet_id_4967fb90")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_points {
+  id             Int             @id @default(autoincrement())
+  score          Int
+  issue_id       Int?
+  user_id        Int
+  domain_id      Int?
+  created        DateTime        @db.Timestamptz(6)
+  modified       DateTime        @db.Timestamptz(6)
+  reason         String?
+  website_domain website_domain? @relation(fields: [domain_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_points_domain_id_2f58a1eb_fk_website_domain_id")
+  website_issue  website_issue?  @relation(fields: [issue_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_points_issue_id_2e7551a0_fk_website_issue_id")
+  auth_user      auth_user       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_points_user_id_6e7617f2_fk_auth_user_id")
+
+  @@index([domain_id], map: "website_points_domain_id_2f58a1eb")
+  @@index([issue_id], map: "website_points_issue_id_2e7551a0")
+  @@index([user_id], map: "website_points_user_id_6e7617f2")
+}
+
+model website_pranalysisreport {
+  id                       Int      @id @default(autoincrement())
+  pr_link                  String   @db.VarChar(200)
+  issue_link               String   @db.VarChar(200)
+  priority_alignment_score Int
+  revision_score           Int
+  recommendations          String
+  created_at               DateTime @db.Timestamptz(6)
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_project {
+  id                   Int                    @id @default(autoincrement())
+  name                 String                 @db.VarChar(255)
+  slug                 String                 @unique @db.VarChar(50)
+  description          String
+  created              DateTime               @db.Timestamptz(6)
+  modified             DateTime               @db.Timestamptz(6)
+  facebook             String?                @db.VarChar(200)
+  logo                 String?                @db.VarChar(255)
+  organization_id      Int?
+  twitter              String?                @db.VarChar(30)
+  url                  String?                @unique @db.VarChar(255)
+  project_visit_count  Int
+  status               String                 @db.VarChar(20)
+  slack                String?                @db.VarChar(200)
+  slack_channel        String?                @db.VarChar(255)
+  slack_id             String?                @unique @db.VarChar(255)
+  slack_user_count     Int
+  website_contribution website_contribution[]
+  website_forumpost    website_forumpost[]
+  website_organization website_organization?  @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_project_organization_id_083382eb_fk_website_o")
+  website_repo         website_repo[]
+  website_slackchannel website_slackchannel[]
+
+  @@index([organization_id], map: "project_org_idx")
+  @@index([organization_id], map: "website_project_organization_id_083382eb")
+  @@index([slack_id], map: "website_project_slack_id_6a919225_like")
+  @@index([slug], map: "website_project_slug_47faeaff_like")
+  @@index([url], map: "website_project_url_e9107c55_like")
+}
+
+model website_queue {
+  id          Int       @id @default(autoincrement())
+  message     String    @db.VarChar(280)
+  image       String?   @db.VarChar(100)
+  created     DateTime  @db.Timestamptz(6)
+  modified    DateTime  @db.Timestamptz(6)
+  launched    Boolean
+  launched_at DateTime? @db.Timestamptz(6)
+  txid        String?   @db.VarChar(255)
+  url         String?   @db.VarChar(200)
+
+  @@index([created], map: "queue_created_idx")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_rating {
+  id                  Int                 @id @default(autoincrement())
+  score               Decimal             @db.Decimal(3, 2)
+  comment             String?
+  created_at          DateTime            @db.Timestamptz(6)
+  course_id           Int
+  user_id             Int
+  website_course      website_course      @relation(fields: [course_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_rating_course_id_cb848e18_fk_website_course_id")
+  website_userprofile website_userprofile @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_rating_user_id_23a5e6b2_fk_website_userprofile_id")
+
+  @@index([course_id], map: "website_rating_course_id_cb848e18")
+  @@index([user_id], map: "website_rating_user_id_23a5e6b2")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_remindersettings {
+  id                 Int       @id @default(autoincrement())
+  reminder_time      DateTime  @db.Time(6)
+  timezone           String    @db.VarChar(50)
+  is_active          Boolean
+  last_reminder_sent DateTime? @db.Timestamptz(6)
+  created_at         DateTime  @db.Timestamptz(6)
+  updated_at         DateTime  @db.Timestamptz(6)
+  user_id            Int       @unique
+  reminder_time_utc  DateTime? @db.Time(6)
+  auth_user          auth_user @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_remindersettings_user_id_70f91fc6_fk_auth_user_id")
+
+  @@index([is_active], map: "website_rem_is_acti_d29d2c_idx")
+  @@index([reminder_time_utc], map: "website_rem_reminde_fc3689_idx")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_repo {
+  id                             Int                              @id @default(autoincrement())
+  name                           String                           @db.VarChar(255)
+  slug                           String                           @unique @db.VarChar(50)
+  description                    String?
+  repo_url                       String                           @unique @db.VarChar(200)
+  homepage_url                   String?                          @db.VarChar(200)
+  is_main                        Boolean
+  is_wiki                        Boolean
+  stars                          Int
+  forks                          Int
+  open_issues                    Int
+  last_updated                   DateTime?                        @db.Timestamptz(6)
+  total_issues                   Int
+  repo_visit_count               Int
+  watchers                       Int
+  open_pull_requests             Int
+  primary_language               String?                          @db.VarChar(50)
+  license                        String?                          @db.VarChar(100)
+  last_commit_date               DateTime?                        @db.Timestamptz(6)
+  created                        DateTime                         @db.Timestamptz(6)
+  modified                       DateTime                         @db.Timestamptz(6)
+  network_count                  Int
+  subscribers_count              Int
+  closed_issues                  Int
+  size                           Int
+  commit_count                   Int
+  created_at                     DateTime                         @db.Timestamptz(6)
+  updated_at                     DateTime                         @db.Timestamptz(6)
+  project_id                     Int?
+  contributor_count              Int
+  logo_url                       String?                          @db.VarChar(200)
+  release_datetime               DateTime?                        @db.Timestamptz(6)
+  release_name                   String?                          @db.VarChar(255)
+  ai_summary                     String?
+  readme_content                 String?
+  closed_pull_requests           Int
+  is_archived                    Boolean
+  is_owasp_repo                  Boolean
+  organization_id                Int?
+  last_pr_fetch_date             DateTime?                        @db.Timestamptz(6)
+  last_pr_page_processed         Int
+  website_contributorstats       website_contributorstats[]
+  website_forumpost              website_forumpost[]
+  website_githubcomment          website_githubcomment[]
+  website_githubissue            website_githubissue[]
+  website_hackathon_repositories website_hackathon_repositories[]
+  website_organization           website_organization?            @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_repo_organization_id_e00eb024_fk_website_o")
+  website_project                website_project?                 @relation(fields: [project_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_repo_project_id_7532347f_fk_website_project_id")
+  website_repo_contributor       website_repo_contributor[]
+  website_repo_tags              website_repo_tags[]
+
+  @@index([project_id], map: "repo_project_idx")
+  @@index([organization_id], map: "website_repo_organization_id_e00eb024")
+  @@index([project_id], map: "website_repo_project_id_7532347f")
+  @@index([repo_url], map: "website_repo_repo_url_fc82c23a_like")
+  @@index([slug], map: "website_repo_slug_aab645af_like")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_repo_contributor {
+  id                  Int                 @id @default(autoincrement())
+  repo_id             Int
+  contributor_id      Int
+  website_contributor website_contributor @relation(fields: [contributor_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_repo_contrib_contributor_id_d626fc80_fk_website_c")
+  website_repo        website_repo        @relation(fields: [repo_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_repo_contributor_repo_id_eb8ffa66_fk_website_repo_id")
+
+  @@unique([repo_id, contributor_id], map: "website_repo_contributor_repo_id_contributor_id_7acf7437_uniq")
+  @@index([contributor_id], map: "website_repo_contributor_contributor_id_d626fc80")
+  @@index([repo_id], map: "website_repo_contributor_repo_id_eb8ffa66")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_repo_tags {
+  id           Int          @id @default(autoincrement())
+  repo_id      Int
+  tag_id       Int
+  website_repo website_repo @relation(fields: [repo_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_repo_tags_repo_id_d04ef1d4_fk_website_repo_id")
+  website_tag  website_tag  @relation(fields: [tag_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_repo_tags_tag_id_2cfe896e_fk_website_tag_id")
+
+  @@unique([repo_id, tag_id], map: "website_repo_tags_repo_id_tag_id_c7bdc68e_uniq")
+  @@index([repo_id], map: "website_repo_tags_repo_id_d04ef1d4")
+  @@index([tag_id], map: "website_repo_tags_tag_id_2cfe896e")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_room {
+  id                 Int                  @id @default(autoincrement())
+  name               String               @db.VarChar(255)
+  type               String               @db.VarChar(20)
+  custom_type        String?              @db.VarChar(255)
+  description        String?
+  created_at         DateTime             @db.Timestamptz(6)
+  admin_id           Int?
+  session_key        String?              @db.VarChar(40)
+  website_message    website_message[]
+  auth_user          auth_user?           @relation(fields: [admin_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_room_admin_id_e4e7b6ac_fk_auth_user_id")
+  website_room_users website_room_users[]
+
+  @@index([admin_id], map: "website_room_admin_id_e4e7b6ac")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_room_users {
+  id           Int          @id @default(autoincrement())
+  room_id      Int
+  user_id      Int
+  website_room website_room @relation(fields: [room_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_room_users_room_id_0b165e56_fk_website_room_id")
+  auth_user    auth_user    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_room_users_user_id_276ab250_fk_auth_user_id")
+
+  @@unique([room_id, user_id], map: "website_room_users_room_id_user_id_b7410e38_uniq")
+  @@index([room_id], map: "website_room_users_room_id_0b165e56")
+  @@index([user_id], map: "website_room_users_user_id_276ab250")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_searchhistory {
+  id           Int       @id @default(autoincrement())
+  query        String    @db.VarChar(255)
+  search_type  String    @db.VarChar(50)
+  result_count Int?
+  timestamp    DateTime  @db.Timestamptz(6)
+  user_id      Int
+  auth_user    auth_user @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_searchhistory_user_id_69451fe9_fk_auth_user_id")
+
+  @@index([user_id, timestamp(sort: Desc)], map: "search_hist_user_time_idx")
+  @@index([user_id], map: "website_searchhistory_user_id_69451fe9")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_section {
+  id              Int               @id @default(autoincrement())
+  title           String            @db.VarChar(200)
+  description     String?
+  order           Int
+  course_id       Int
+  website_lecture website_lecture[]
+  website_course  website_course    @relation(fields: [course_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_section_course_id_4d28ec70_fk_website_course_id")
+
+  @@index([course_id], map: "website_section_course_id_4d28ec70")
+}
+
+model website_slackbotactivity {
+  id             Int      @id @default(autoincrement())
+  workspace_id   String   @db.VarChar(20)
+  workspace_name String?  @db.VarChar(255)
+  activity_type  String   @db.VarChar(20)
+  user_id        String?  @db.VarChar(20)
+  details        Json
+  success        Boolean
+  error_message  String?
+  created        DateTime @db.Timestamptz(6)
+  username       String?  @db.VarChar(255)
+
+  @@index([created], map: "website_sla_created_6b716d_idx")
+  @@index([workspace_id, activity_type], map: "website_sla_workspa_1c714c_idx")
+  @@index([created], map: "website_slackbotactivity_created_c0b9fb05")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_slackchannel {
+  channel_id           String                @id @db.VarChar(50)
+  name                 String                @db.VarChar(255)
+  topic                String
+  purpose              String
+  num_members          Int
+  is_private           Boolean
+  is_archived          Boolean
+  is_general           Boolean
+  creator              String                @db.VarChar(50)
+  created_at           DateTime?             @db.Timestamptz(6)
+  slack_url            String                @db.VarChar(255)
+  last_synced          DateTime              @db.Timestamptz(6)
+  organization_id      Int?
+  project_id           Int?
+  website_organization website_organization? @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_slackchannel_organization_id_f78a9b4b_fk_website_o")
+  website_project      website_project?      @relation(fields: [project_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_slackchannel_project_id_0746740f_fk_website_project_id")
+
+  @@index([num_members], map: "slackchannel_members_idx")
+  @@index([name], map: "slackchannel_name_idx")
+  @@index([channel_id], map: "website_slackchannel_channel_id_bee6109c_like")
+  @@index([name], map: "website_slackchannel_name_bad6e29f")
+  @@index([name], map: "website_slackchannel_name_bad6e29f_like")
+  @@index([organization_id], map: "website_slackchannel_organization_id_f78a9b4b")
+  @@index([project_id], map: "website_slackchannel_project_id_0746740f")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_slackintegration {
+  id                   Int                 @id @default(autoincrement())
+  bot_access_token     String?             @db.VarChar(255)
+  workspace_name       String?             @db.VarChar(255)
+  default_channel_name String?             @db.VarChar(255)
+  default_channel_id   String?             @db.VarChar(255)
+  daily_updates        Boolean
+  daily_update_time    Int?
+  integration_id       Int                 @unique
+  welcome_message      String?
+  website_integration  website_integration @relation(fields: [integration_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_slackintegra_integration_id_7bf9e66f_fk_website_i")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_stakingentry {
+  id                  Int                 @id @default(autoincrement())
+  staked_amount       Decimal             @db.Decimal(10, 2)
+  actual_reward       Decimal             @db.Decimal(10, 2)
+  status              String              @db.VarChar(20)
+  challenge_completed Boolean
+  completion_time     DateTime?           @db.Timestamptz(6)
+  created_at          DateTime            @db.Timestamptz(6)
+  updated_at          DateTime            @db.Timestamptz(6)
+  user_id             Int
+  pool_id             Int
+  website_stakingpool website_stakingpool @relation(fields: [pool_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_stakingentry_pool_id_b77c73dd_fk_website_stakingpool_id")
+  auth_user           auth_user           @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_stakingentry_user_id_60943595_fk_auth_user_id")
+
+  @@unique([user_id, pool_id], map: "website_stakingentry_user_id_pool_id_191c840e_uniq")
+  @@index([pool_id], map: "website_stakingentry_pool_id_b77c73dd")
+  @@index([user_id], map: "website_stakingentry_user_id_60943595")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_stakingpool {
+  id                                                     Int                          @id @default(autoincrement())
+  name                                                   String                       @db.VarChar(255)
+  description                                            String
+  pool_type                                              String                       @db.VarChar(20)
+  stake_amount                                           Decimal                      @db.Decimal(10, 2)
+  start_date                                             DateTime                     @db.Timestamptz(6)
+  end_date                                               DateTime                     @db.Timestamptz(6)
+  status                                                 String                       @db.VarChar(20)
+  completed_at                                           DateTime?                    @db.Timestamptz(6)
+  created_at                                             DateTime                     @db.Timestamptz(6)
+  updated_at                                             DateTime                     @db.Timestamptz(6)
+  challenge_id                                           Int
+  created_by_id                                          Int
+  winner_id                                              Int?
+  website_stakingentry                                   website_stakingentry[]
+  website_challenge                                      website_challenge            @relation(fields: [challenge_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_stakingpool_challenge_id_4e783106_fk_website_c")
+  auth_user_website_stakingpool_created_by_idToauth_user auth_user                    @relation("website_stakingpool_created_by_idToauth_user", fields: [created_by_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_stakingpool_created_by_id_4f72e2b4_fk_auth_user_id")
+  auth_user_website_stakingpool_winner_idToauth_user     auth_user?                   @relation("website_stakingpool_winner_idToauth_user", fields: [winner_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_stakingpool_winner_id_98851e29_fk_auth_user_id")
+  website_stakingtransaction                             website_stakingtransaction[]
+
+  @@index([challenge_id], map: "website_stakingpool_challenge_id_4e783106")
+  @@index([created_by_id], map: "website_stakingpool_created_by_id_4f72e2b4")
+  @@index([winner_id], map: "website_stakingpool_winner_id_98851e29")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_stakingtransaction {
+  id                  Int                 @id @default(autoincrement())
+  transaction_type    String              @db.VarChar(20)
+  amount              Decimal             @db.Decimal(10, 2)
+  description         String
+  created_at          DateTime            @db.Timestamptz(6)
+  pool_id             Int
+  user_id             Int
+  website_stakingpool website_stakingpool @relation(fields: [pool_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_stakingtrans_pool_id_beb9819c_fk_website_s")
+  auth_user           auth_user           @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_stakingtransaction_user_id_9139772a_fk_auth_user_id")
+
+  @@index([pool_id], map: "website_stakingtransaction_pool_id_beb9819c")
+  @@index([user_id], map: "website_stakingtransaction_user_id_9139772a")
+}
+
+model website_subscription {
+  id                   Int                    @id @default(autoincrement())
+  name                 String                 @db.VarChar(25)
+  charge_per_month     Int
+  feature              Boolean
+  number_of_domains    Int
+  hunt_per_domain      Int
+  created              DateTime               @db.Timestamptz(6)
+  website_organization website_organization[]
+}
+
+model website_tag {
+  id                                 Int                                  @id @default(autoincrement())
+  name                               String                               @db.VarChar(255)
+  created                            DateTime                             @db.Timestamptz(6)
+  slug                               String                               @unique @db.VarChar(50)
+  website_course_tags                website_course_tags[]
+  website_domain_tags                website_domain_tags[]
+  website_issue_tags                 website_issue_tags[]
+  website_lecture_tags               website_lecture_tags[]
+  website_organization_tags          website_organization_tags[]
+  website_ossharticle_tags           website_ossharticle_tags[]
+  website_osshcommunity_tags         website_osshcommunity_tags[]
+  website_osshdiscussionchannel_tags website_osshdiscussionchannel_tags[]
+  website_repo_tags                  website_repo_tags[]
+  website_userprofile_tags           website_userprofile_tags[]
+
+  @@index([slug], map: "website_tag_slug_d522d526_like")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_taskcontent {
+  id                Int           @id @default(autoincrement())
+  theory_content    String
+  mcq_question      String
+  mcq_options       Json
+  correct_answer    String        @db.VarChar(10)
+  simulation_config Json
+  created_at        DateTime      @db.Timestamptz(6)
+  task_id           Int           @unique
+  website_tasks     website_tasks @relation(fields: [task_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_taskcontent_task_id_9a5aa4d2_fk_website_tasks_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_tasks {
+  id                       Int                        @id @default(autoincrement())
+  name                     String                     @db.VarChar(255)
+  description              String
+  task_type                String                     @db.VarChar(20)
+  order                    Int
+  is_active                Boolean
+  created_at               DateTime                   @db.Timestamptz(6)
+  lab_id                   Int
+  website_taskcontent      website_taskcontent?
+  website_labs             website_labs               @relation(fields: [lab_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_tasks_lab_id_0c72e8cb_fk_website_labs_id")
+  website_usertaskprogress website_usertaskprogress[]
+
+  @@unique([lab_id, order], map: "website_tasks_lab_id_order_7afbd37c_uniq")
+  @@index([lab_id], map: "website_tasks_lab_id_0c72e8cb")
+}
+
+model website_thread {
+  id                          Int                           @id @default(autoincrement())
+  updated_at                  DateTime                      @db.Timestamptz(6)
+  website_message             website_message[]
+  website_thread_participants website_thread_participants[]
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_thread_participants {
+  id             Int            @id @default(autoincrement())
+  thread_id      Int
+  user_id        Int
+  website_thread website_thread @relation(fields: [thread_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_thread_parti_thread_id_12a3443a_fk_website_t")
+  auth_user      auth_user      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_thread_participants_user_id_dadd0096_fk_auth_user_id")
+
+  @@unique([thread_id, user_id], map: "website_thread_participants_thread_id_user_id_94f6ea5f_uniq")
+  @@index([thread_id], map: "website_thread_participants_thread_id_12a3443a")
+  @@index([user_id], map: "website_thread_participants_user_id_dadd0096")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_timelog {
+  id                   Int                      @id @default(autoincrement())
+  start_time           DateTime                 @db.Timestamptz(6)
+  end_time             DateTime?                @db.Timestamptz(6)
+  duration             Unsupported("interval")?
+  github_issue_url     String?                  @db.VarChar(200)
+  created              DateTime                 @db.Timestamptz(6)
+  user_id              Int
+  organization_id      Int?
+  website_organization website_organization?    @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_timelog_organization_id_d29606a1_fk_website_o")
+  auth_user            auth_user                @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_timelog_user_id_dc6df299_fk_auth_user_id")
+
+  @@index([organization_id], map: "website_timelog_organization_id_d29606a1")
+  @@index([user_id], map: "website_timelog_user_id_dc6df299")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_trademark {
+  id                       Int                        @id @default(autoincrement())
+  keyword                  String                     @db.VarChar(255)
+  registration_number      String?                    @db.VarChar(50)
+  serial_number            String?                    @db.VarChar(50)
+  status_label             String?                    @db.VarChar(50)
+  status_code              String?                    @db.VarChar(20)
+  status_date              DateTime?                  @db.Date
+  status_definition        String?                    @db.VarChar(255)
+  filing_date              DateTime?                  @db.Date
+  registration_date        DateTime?                  @db.Date
+  abandonment_date         DateTime?                  @db.Date
+  expiration_date          DateTime?                  @db.Date
+  description              String?
+  organization_id          Int?
+  website_organization     website_organization?      @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_trademark_organization_id_0e7fc9f9_fk_website_o")
+  website_trademark_owners website_trademark_owners[]
+
+  @@index([organization_id], map: "website_trademark_organization_id_0e7fc9f9")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_trademark_owners {
+  id                     Int                    @id @default(autoincrement())
+  trademark_id           Int
+  trademarkowner_id      Int
+  website_trademark      website_trademark      @relation(fields: [trademark_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_trademark_ow_trademark_id_0cade03b_fk_website_t")
+  website_trademarkowner website_trademarkowner @relation(fields: [trademarkowner_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_trademark_ow_trademarkowner_id_4143dc3e_fk_website_t")
+
+  @@unique([trademark_id, trademarkowner_id], map: "website_trademark_owners_trademark_id_trademarkow_f805602d_uniq")
+  @@index([trademark_id], map: "website_trademark_owners_trademark_id_0cade03b")
+  @@index([trademarkowner_id], map: "website_trademark_owners_trademarkowner_id_4143dc3e")
+}
+
+model website_trademarkowner {
+  id                       Int                        @id @default(autoincrement())
+  name                     String                     @db.VarChar(255)
+  address1                 String?                    @db.VarChar(255)
+  address2                 String?                    @db.VarChar(255)
+  city                     String?                    @db.VarChar(100)
+  state                    String?                    @db.VarChar(100)
+  country                  String?                    @db.VarChar(100)
+  postcode                 String?                    @db.VarChar(20)
+  owner_type               String?                    @db.VarChar(20)
+  owner_label              String?                    @db.VarChar(100)
+  legal_entity_type        String?                    @db.VarChar(20)
+  legal_entity_type_label  String?                    @db.VarChar(100)
+  website_trademark_owners website_trademark_owners[]
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_transaction {
+  id              Int            @id @default(autoincrement())
+  value           Decimal        @db.Decimal(6, 2)
+  running_balance Decimal        @db.Decimal(6, 2)
+  created         DateTime       @db.Timestamptz(6)
+  wallet_id       Int
+  website_wallet  website_wallet @relation(fields: [wallet_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_transaction_wallet_id_6cfa6d3c_fk_website_wallet_id")
+
+  @@index([wallet_id], map: "website_transaction_wallet_id_6cfa6d3c")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_useradventureprogress {
+  id                         Int                          @id @default(autoincrement())
+  started_at                 DateTime                     @db.Timestamptz(6)
+  completed_at               DateTime?                    @db.Timestamptz(6)
+  completed                  Boolean
+  adventure_id               Int
+  user_id                    Int
+  website_adventure          website_adventure            @relation(fields: [adventure_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_useradventur_adventure_id_e2550a1a_fk_website_a")
+  auth_user                  auth_user                    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_useradventureprogress_user_id_479f2713_fk_auth_user_id")
+  website_usertasksubmission website_usertasksubmission[]
+
+  @@unique([user_id, adventure_id], map: "website_useradventurepro_user_id_adventure_id_aac3ed6a_uniq")
+  @@index([adventure_id], map: "website_useradventureprogress_adventure_id_e2550a1a")
+  @@index([user_id], map: "website_useradventureprogress_user_id_479f2713")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_userbadge {
+  id                                                   Int           @id @default(autoincrement())
+  awarded_at                                           DateTime      @db.Timestamptz(6)
+  reason                                               String?
+  awarded_by_id                                        Int?
+  badge_id                                             Int
+  user_id                                              Int
+  auth_user_website_userbadge_awarded_by_idToauth_user auth_user?    @relation("website_userbadge_awarded_by_idToauth_user", fields: [awarded_by_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_userbadge_awarded_by_id_999c3685_fk_auth_user_id")
+  website_badge                                        website_badge @relation(fields: [badge_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_userbadge_badge_id_e9e04039_fk_website_badge_id")
+  auth_user_website_userbadge_user_idToauth_user       auth_user     @relation("website_userbadge_user_idToauth_user", fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_userbadge_user_id_7e928d24_fk_auth_user_id")
+
+  @@index([awarded_by_id], map: "website_userbadge_awarded_by_id_999c3685")
+  @@index([badge_id], map: "website_userbadge_badge_id_e9e04039")
+  @@index([user_id], map: "website_userbadge_user_id_7e928d24")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_userlabprogress {
+  id            Int          @id @default(autoincrement())
+  started_at    DateTime     @db.Timestamptz(6)
+  completed_at  DateTime?    @db.Timestamptz(6)
+  last_accessed DateTime     @db.Timestamptz(6)
+  created_at    DateTime     @db.Timestamptz(6)
+  updated_at    DateTime     @db.Timestamptz(6)
+  lab_id        Int
+  user_id       Int
+  website_labs  website_labs @relation(fields: [lab_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_userlabprogress_lab_id_16c474d5_fk_website_labs_id")
+  auth_user     auth_user    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_userlabprogress_user_id_f00571a3_fk_auth_user_id")
+
+  @@unique([user_id, lab_id], map: "website_userlabprogress_user_id_lab_id_f33d649e_uniq")
+  @@index([lab_id], map: "website_userlabprogress_lab_id_16c474d5")
+  @@index([user_id], map: "website_userlabprogress_user_id_f00571a3")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_userprofile {
+  id                                                                                               Int                                      @id @default(autoincrement())
+  user_avatar                                                                                      String?                                  @db.VarChar(100)
+  user_id                                                                                          Int                                      @unique
+  title                                                                                            Int
+  winnings                                                                                         Decimal?                                 @db.Decimal(10, 2)
+  description                                                                                      String?
+  issues_hidden                                                                                    Boolean
+  bch_address                                                                                      String?                                  @db.VarChar(100)
+  btc_address                                                                                      String?                                  @db.VarChar(100)
+  eth_address                                                                                      String?                                  @db.VarChar(100)
+  created                                                                                          DateTime                                 @db.Timestamptz(6)
+  discounted_hourly_rate                                                                           Decimal                                  @db.Decimal(10, 2)
+  github_url                                                                                       String?                                  @db.VarChar(200)
+  linkedin_url                                                                                     String?                                  @db.VarChar(200)
+  website_url                                                                                      String?                                  @db.VarChar(200)
+  x_username                                                                                       String?                                  @db.VarChar(50)
+  role                                                                                             String?                                  @db.VarChar(255)
+  modified                                                                                         DateTime                                 @db.Timestamptz(6)
+  visit_count                                                                                      Int
+  current_streak                                                                                   Int
+  last_check_in                                                                                    DateTime?                                @db.Date
+  longest_streak                                                                                   Int
+  team_id                                                                                          Int?
+  contribution_rank                                                                                Int
+  merged_pr_count                                                                                  Int
+  email_bounce_reason                                                                              String?
+  email_click_count                                                                                Int
+  email_last_event                                                                                 String?                                  @db.VarChar(50)
+  email_last_event_time                                                                            DateTime?                                @db.Timestamptz(6)
+  email_open_count                                                                                 Int
+  email_spam_report                                                                                Boolean
+  email_status                                                                                     String?                                  @db.VarChar(50)
+  email_unsubscribed                                                                               Boolean
+  public_key                                                                                       String?
+  daily_visit_count                                                                                Int
+  last_visit_day                                                                                   DateTime?                                @db.Date
+  is_verifier                                                                                      Boolean
+  comments_comment                                                                                 comments_comment[]
+  website_course                                                                                   website_course[]
+  website_enrollment                                                                               website_enrollment[]
+  website_githubcomment                                                                            website_githubcomment[]
+  website_githubissue                                                                              website_githubissue[]
+  website_githubreview                                                                             website_githubreview[]
+  website_lecture                                                                                  website_lecture[]
+  website_lecturestatus                                                                            website_lecturestatus[]
+  website_rating                                                                                   website_rating[]
+  website_organization                                                                             website_organization?                    @relation(fields: [team_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_userprofile_team_id_797eb4bd_fk_website_organization_id")
+  auth_user                                                                                        auth_user                                @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_userprofile_user_id_8d46ec2a_fk_auth_user_id")
+  website_userprofile_follows_website_userprofile_follows_from_userprofile_idTowebsite_userprofile website_userprofile_follows[]            @relation("website_userprofile_follows_from_userprofile_idTowebsite_userprofile")
+  website_userprofile_follows_website_userprofile_follows_to_userprofile_idTowebsite_userprofile   website_userprofile_follows[]            @relation("website_userprofile_follows_to_userprofile_idTowebsite_userprofile")
+  website_userprofile_issue_downvoted                                                              website_userprofile_issue_downvoted[]
+  website_userprofile_issue_flaged                                                                 website_userprofile_issue_flaged[]
+  website_userprofile_issue_saved                                                                  website_userprofile_issue_saved[]
+  website_userprofile_issue_upvoted                                                                website_userprofile_issue_upvoted[]
+  website_userprofile_subscribed_domains                                                           website_userprofile_subscribed_domains[]
+  website_userprofile_subscribed_users                                                             website_userprofile_subscribed_users[]
+  website_userprofile_tags                                                                         website_userprofile_tags[]
+
+  @@index([team_id], map: "website_userprofile_team_id_797eb4bd")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_userprofile_follows {
+  id                                                                                       Int                 @id @default(autoincrement())
+  from_userprofile_id                                                                      Int
+  to_userprofile_id                                                                        Int
+  website_userprofile_website_userprofile_follows_from_userprofile_idTowebsite_userprofile website_userprofile @relation("website_userprofile_follows_from_userprofile_idTowebsite_userprofile", fields: [from_userprofile_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_userprofile__from_userprofile_id_b2ff13f9_fk_website_u")
+  website_userprofile_website_userprofile_follows_to_userprofile_idTowebsite_userprofile   website_userprofile @relation("website_userprofile_follows_to_userprofile_idTowebsite_userprofile", fields: [to_userprofile_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_userprofile__to_userprofile_id_1e611325_fk_website_u")
+
+  @@unique([from_userprofile_id, to_userprofile_id], map: "website_userprofile_foll_from_userprofile_id_to_u_dbfeaec6_uniq")
+  @@index([from_userprofile_id], map: "website_userprofile_follows_from_userprofile_id_b2ff13f9")
+  @@index([to_userprofile_id], map: "website_userprofile_follows_to_userprofile_id_1e611325")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_userprofile_issue_downvoted {
+  id                  Int                 @id @default(autoincrement())
+  userprofile_id      Int
+  issue_id            Int
+  website_issue       website_issue       @relation(fields: [issue_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_userprofile__issue_id_633c616e_fk_website_i")
+  website_userprofile website_userprofile @relation(fields: [userprofile_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_userprofile__userprofile_id_7d9a1b2f_fk_website_u")
+
+  @@unique([userprofile_id, issue_id], map: "website_userprofile_issu_userprofile_id_issue_id_fbbd1693_uniq")
+  @@index([issue_id], map: "website_userprofile_issue_downvoted_issue_id_633c616e")
+  @@index([userprofile_id], map: "website_userprofile_issue_downvoted_userprofile_id_7d9a1b2f")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_userprofile_issue_flaged {
+  id                  Int                 @id @default(autoincrement())
+  userprofile_id      Int
+  issue_id            Int
+  website_issue       website_issue       @relation(fields: [issue_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_userprofile__issue_id_6edcbc5b_fk_website_i")
+  website_userprofile website_userprofile @relation(fields: [userprofile_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_userprofile__userprofile_id_50f5f731_fk_website_u")
+
+  @@unique([userprofile_id, issue_id], map: "website_userprofile_issu_userprofile_id_issue_id_eef2e46a_uniq")
+  @@index([issue_id], map: "website_userprofile_issue_flaged_issue_id_6edcbc5b")
+  @@index([userprofile_id], map: "website_userprofile_issue_flaged_userprofile_id_50f5f731")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_userprofile_issue_saved {
+  id                  Int                 @id @default(autoincrement())
+  userprofile_id      Int
+  issue_id            Int
+  website_issue       website_issue       @relation(fields: [issue_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_userprofile__issue_id_0b3b16ea_fk_website_i")
+  website_userprofile website_userprofile @relation(fields: [userprofile_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_userprofile__userprofile_id_571fbdeb_fk_website_u")
+
+  @@unique([userprofile_id, issue_id], map: "website_userprofile_issu_userprofile_id_issue_id_1c4bc81b_uniq")
+  @@index([issue_id], map: "website_userprofile_issue_saved_issue_id_0b3b16ea")
+  @@index([userprofile_id], map: "website_userprofile_issue_saved_userprofile_id_571fbdeb")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_userprofile_issue_upvoted {
+  id                  Int                 @id @default(autoincrement())
+  userprofile_id      Int
+  issue_id            Int
+  website_issue       website_issue       @relation(fields: [issue_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_userprofile__issue_id_512cacaf_fk_website_i")
+  website_userprofile website_userprofile @relation(fields: [userprofile_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_userprofile__userprofile_id_78d6b39e_fk_website_u")
+
+  @@unique([userprofile_id, issue_id], map: "website_userprofile_issu_userprofile_id_issue_id_04297f84_uniq")
+  @@index([issue_id], map: "website_userprofile_issue_upvoted_issue_id_512cacaf")
+  @@index([userprofile_id], map: "website_userprofile_issue_upvoted_userprofile_id_78d6b39e")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_userprofile_subscribed_domains {
+  id                  Int                 @id @default(autoincrement())
+  userprofile_id      Int
+  domain_id           Int
+  website_domain      website_domain      @relation(fields: [domain_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_userprofile__domain_id_05eec489_fk_website_d")
+  website_userprofile website_userprofile @relation(fields: [userprofile_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_userprofile__userprofile_id_57e943bd_fk_website_u")
+
+  @@unique([userprofile_id, domain_id], map: "website_userprofile_subs_userprofile_id_domain_id_ec53a6d8_uniq")
+  @@index([domain_id], map: "website_userprofile_subscribed_domains_domain_id_05eec489")
+  @@index([userprofile_id], map: "website_userprofile_subscribed_domains_userprofile_id_57e943bd")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_userprofile_subscribed_users {
+  id                  Int                 @id @default(autoincrement())
+  userprofile_id      Int
+  user_id             Int
+  auth_user           auth_user           @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_userprofile__user_id_4ecbb2e2_fk_auth_user")
+  website_userprofile website_userprofile @relation(fields: [userprofile_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_userprofile__userprofile_id_a435f3da_fk_website_u")
+
+  @@unique([userprofile_id, user_id], map: "website_userprofile_subs_userprofile_id_user_id_6d72c130_uniq")
+  @@index([user_id], map: "website_userprofile_subscribed_users_user_id_4ecbb2e2")
+  @@index([userprofile_id], map: "website_userprofile_subscribed_users_userprofile_id_a435f3da")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_userprofile_tags {
+  id                  Int                 @id @default(autoincrement())
+  userprofile_id      Int
+  tag_id              Int
+  website_userprofile website_userprofile @relation(fields: [userprofile_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_userprofile__userprofile_id_c5f2260d_fk_website_u")
+  website_tag         website_tag         @relation(fields: [tag_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_userprofile_tags_tag_id_e1a93482_fk_website_tag_id")
+
+  @@unique([userprofile_id, tag_id], map: "website_userprofile_tags_userprofile_id_tag_id_51d513a9_uniq")
+  @@index([tag_id], map: "website_userprofile_tags_tag_id_e1a93482")
+  @@index([userprofile_id], map: "website_userprofile_tags_userprofile_id_c5f2260d")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_usertaskprogress {
+  id              Int           @id @default(autoincrement())
+  completed       Boolean
+  completed_at    DateTime?     @db.Timestamptz(6)
+  attempts        Int
+  last_attempt_at DateTime      @db.Timestamptz(6)
+  user_answer     String
+  created_at      DateTime      @db.Timestamptz(6)
+  updated_at      DateTime      @db.Timestamptz(6)
+  task_id         Int
+  user_id         Int
+  website_tasks   website_tasks @relation(fields: [task_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_usertaskprogress_task_id_9411d8fe_fk_website_tasks_id")
+  auth_user       auth_user     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_usertaskprogress_user_id_3d209383_fk_auth_user_id")
+
+  @@unique([user_id, task_id], map: "website_usertaskprogress_user_id_task_id_347db30b_uniq")
+  @@index([task_id], map: "website_usertaskprogress_task_id_9411d8fe")
+  @@index([user_id], map: "website_usertaskprogress_user_id_3d209383")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_usertasksubmission {
+  id                            Int                           @id @default(autoincrement())
+  proof_url                     String                        @db.VarChar(200)
+  notes                         String
+  submitted_at                  DateTime                      @db.Timestamptz(6)
+  reviewed_at                   DateTime?                     @db.Timestamptz(6)
+  status                        String                        @db.VarChar(20)
+  approved                      Boolean
+  reviewer_notes                String
+  progress_id                   Int
+  reviewed_by_id                Int?
+  task_id                       Int
+  website_useradventureprogress website_useradventureprogress @relation(fields: [progress_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_usertasksubm_progress_id_af372c52_fk_website_u")
+  auth_user                     auth_user?                    @relation(fields: [reviewed_by_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_usertasksubm_reviewed_by_id_d92ca97a_fk_auth_user")
+  website_adventuretask         website_adventuretask         @relation(fields: [task_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_usertasksubm_task_id_70a402c1_fk_website_a")
+
+  @@unique([progress_id, task_id], map: "website_usertasksubmission_progress_id_task_id_7b90bb48_uniq")
+  @@index([progress_id], map: "website_usertasksubmission_progress_id_af372c52")
+  @@index([reviewed_by_id], map: "website_usertasksubmission_reviewed_by_id_d92ca97a")
+  @@index([task_id], map: "website_usertasksubmission_task_id_70a402c1")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_wallet {
+  id                  Int                   @id @default(autoincrement())
+  current_balance     Decimal               @db.Decimal(6, 2)
+  created             DateTime              @db.Timestamptz(6)
+  user_id             Int
+  account_id          String?
+  website_payment     website_payment[]
+  website_transaction website_transaction[]
+  auth_user           auth_user             @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_wallet_user_id_4e771050_fk_auth_user_id")
+
+  @@index([user_id], map: "website_wallet_user_id_4e771050")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model website_winner {
+  id                                                   Int                @id @default(autoincrement())
+  prize_distributed                                    Boolean
+  runner_id                                            Int?
+  second_runner_id                                     Int?
+  winner_id                                            Int?
+  hunt_id                                              Int?
+  prize_id                                             Int?
+  prize_amount                                         Decimal            @db.Decimal(6, 2)
+  created                                              DateTime           @db.Timestamptz(6)
+  website_hunt                                         website_hunt?      @relation(fields: [hunt_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_winner_hunt_id_e7a4a705_fk_website_hunt_id")
+  website_huntprize                                    website_huntprize? @relation(fields: [prize_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_winner_prize_id_44e84e96_fk_website_huntprize_id")
+  auth_user_website_winner_runner_idToauth_user        auth_user?         @relation("website_winner_runner_idToauth_user", fields: [runner_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_winner_runner_id_99e86a2a_fk_auth_user_id")
+  auth_user_website_winner_second_runner_idToauth_user auth_user?         @relation("website_winner_second_runner_idToauth_user", fields: [second_runner_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_winner_second_runner_id_e3394816_fk_auth_user_id")
+  auth_user_website_winner_winner_idToauth_user        auth_user?         @relation("website_winner_winner_idToauth_user", fields: [winner_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "website_winner_winner_id_7dead191_fk_auth_user_id")
+
+  @@index([hunt_id], map: "website_winner_hunt_id_e7a4a705")
+  @@index([prize_id], map: "website_winner_prize_id_44e84e96")
+  @@index([runner_id], map: "website_winner_runner_id_99e86a2a")
+  @@index([second_runner_id], map: "website_winner_second_runner_id_e3394816")
+  @@index([winner_id], map: "website_winner_winner_id_7dead191")
 }

@@ -1,0 +1,13 @@
+
+
+generator client {
+  provider = "prisma-client"
+  output   = "./generated"
+}
+// This `datasource` file isn't used but Prisma ORM still requires the `datasource` definition.
+// Your SQLite database file will be managed by D1:
+// - A local version will exist in `.wrangler`.
+// - The remote version is managed by Cloudflare in the Cloud.
+datasource db {
+  provider = "sqlite"
+}

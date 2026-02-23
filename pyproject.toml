@@ -1,6 +1,6 @@
 [project]
 name = "blt-api"
-version = "1.0.0"
+version = "1.0.1"
 description = "Full-featured API for OWASP BLT that runs on Cloudflare Workers"
 readme = "README.md"
 requires-python = ">=3.12"
